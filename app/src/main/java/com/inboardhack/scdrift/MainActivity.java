@@ -1,6 +1,11 @@
 package com.inboardhack.scdrift;
 
+import android.content.ComponentName;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -9,7 +14,10 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements ServiceConnection {
+
+    private ScoreView scoreView;
+    private ScoreViewUpdater scoreViewUpdater;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -17,7 +25,13 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        initUi();
+        scoreViewUpdater = new ScoreViewUpdater(new Handler(), scoreView);
+        scoreViewUpdater.run();
 
+        Intent intent = new Intent(this, DataService.class);
+        startService(intent);
+        bindService(intent, this, 0);
         /*FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -26,6 +40,10 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });*/
+    }
+
+    private void initUi() {
+        scoreView = (ScoreView) findViewById(R.id.score_view);
     }
 
     @Override
@@ -48,5 +66,15 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onServiceConnected(ComponentName name, IBinder service) {
+
+    }
+
+    @Override
+    public void onServiceDisconnected(ComponentName name) {
+
     }
 }

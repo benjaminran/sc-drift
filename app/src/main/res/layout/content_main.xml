@@ -11,7 +11,8 @@
     tools:showIn="@layout/activity_main" tools:context=".MainActivity">
 
     <com.inboardhack.scdrift.ScoreView
+        android:id="@+id/score_view"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"></com.inboardhack.scdrift.ScoreView>
+        android:layout_height="wrap_content"/>
 
 </RelativeLayout>

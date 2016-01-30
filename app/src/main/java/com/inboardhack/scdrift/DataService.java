@@ -1,0 +1,39 @@
+package com.inboardhack.scdrift;
+
+import android.app.Service;
+import android.content.Intent;
+import android.os.Binder;
+import android.os.IBinder;
+import android.support.annotation.Nullable;
+
+/**
+ * Created by benjaminran on 1/29/16.
+ */
+public class DataService extends Service {
+
+    private DataServiceBinder binder;
+    private DataThread dataThread;
+
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return new DataServiceBinder();
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        handleIntent(intent);
+        return START_STICKY;
+    }
+
+    private void handleIntent(Intent intent) {
+        dataThread = new DataThread(this);
+        dataThread.start();
+    }
+
+    public class DataServiceBinder extends Binder {
+        DataService getService() {
+            return DataService.this;
+        }
+    }
+}

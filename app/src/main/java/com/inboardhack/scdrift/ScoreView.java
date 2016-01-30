@@ -15,6 +15,8 @@ public class ScoreView extends RelativeLayout {
     private TextView scoreView;
     private TextView scoreLabel;
 
+    private Slide currentSlide;
+
     public ScoreView(Context context) {
         super(context);
         init(context);
@@ -37,12 +39,33 @@ public class ScoreView extends RelativeLayout {
         scoreView.setTextSize(TypedValue.COMPLEX_UNIT_IN, 1);
         scoreLabel = new TextView(context);
         scoreLabel.setText("Score:");
-        update();
+        //update(); // TODO
         addView(scoreView);
         addView(scoreLabel);
     }
 
+    public void updateSpeed(double speed) {
+        scoreView.setText(""+speed);
+    }
+
     public void update() {
-        scoreView.setText(""+score.getScore());
+        double[] acceleration = null;
+        double[] velocity = null;
+        double[] rotation = null;
+        double speed = 0;
+        boolean isSliding = Utils.isSliding(acceleration, velocity, speed);
+        if(currentSlide==null && isSliding) {
+            currentSlide = new Slide();
+        }
+        else if(currentSlide!=null && isSliding) {
+            currentSlide.incrementScore(velocity, rotation, acceleration);
+        }
+        else if(currentSlide!=null && !isSliding) {
+            SlideHistory.getInstance().add(currentSlide);
+        }
+        else { // currentSlide==null && !isSliding
+            // do nothing
+        }
+        scoreView.setText(""+currentSlide.getScore());
     }
 }
