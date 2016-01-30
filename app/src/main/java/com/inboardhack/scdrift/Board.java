@@ -97,7 +97,7 @@ public class Board implements Observer {
         return ret;
     }
     public double[] getRealAcceleration() {
-        double[] ret = {realAccel[0], realAccle[1], realAccel[2]};
+        double[] ret = {realAccel[0], realAccel[1], realAccel[2]};
         return ret;
     }
     public double[] getPosition() {
@@ -286,17 +286,17 @@ public class Board implements Observer {
             BluetoothBridge bridge = dataService.bridge;
 
             double[] velocity = computeVelocity(dataService.getVelocityMeter().speed, dataService.getVelocityMeter().bearing, dataService.getVelocityMeter().da, dataService.getVelocityMeter().dt);
-            updatePosition(bridge.getAccelerometerData(), velocity, new double[]{0, 0, 0}, System.currentTimeMillis()); // TODO: time of bridge or location reading? TODO: world accel, real accel
+            updatePosition(bridge.getWorldAccel(), bridge.getRealAccel(), velocity, new double[]{0, 0, 0}, System.currentTimeMillis()); // TODO: time of bridge or location reading? TODO: world accel, real accel
             setRotation(bridge.getOrientationData());
             Slide slide = newSlide(System.currentTimeMillis());
             if(slide==null && getLastSlide()!=null){ // just started sliding
-                getLastSlide().incrementScore(velocity, getDirection(), bridge.getAccelerometerData()); // TODO: real accel not world accel
+                getLastSlide().incrementScore(velocity, getDirection(), bridge.getRealAccel());
             }
             else if(getLastSlide()==null) { // not sliding
                 return;
             }
             else if(slide!=null) { // in process of sliding
-                slide.incrementScore(velocity, getDirection(), bridge.getAccelerometerData()); // TODO: real accel not world accel
+                slide.incrementScore(velocity, getDirection(), bridge.getRealAccel());
             }
 
             if(lastSlide!=null && getLastSlide().isComplete()){ // just finished

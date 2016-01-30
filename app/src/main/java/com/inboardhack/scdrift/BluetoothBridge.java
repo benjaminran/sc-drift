@@ -72,7 +72,8 @@ public class BluetoothBridge implements SensorEventListener, Runnable {
         }
     }
 
-    public double[] getAccelerometerData() { return accelerometerData; }
+    public double[] getRealAccel() { return accelerometerData; }
+    public double[] getWorldAccel() { return accelerometerData; }
     public double[] getAccelerometerDataWithGravity() { mSensorManager.unregisterListener(this, gravity); return gravityData; }
     public double[] getOrientationData() { return gyroscopeData; } // TODO: length 9
     public double[] getAngularVelocityData() {
