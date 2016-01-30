@@ -9,4 +9,8 @@ public class Utils {
         double slideStrength = Math.abs(caaccel) - Math.abs(acceleration[1]);
         return (slideStrength > MINSLIDESTRENGTH);
     }
+
+    public static double[] computeVelocity(float speed, float bearing /* relative to board nose */, double da, double dt) {
+        
+    }
 }

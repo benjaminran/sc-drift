@@ -17,9 +17,9 @@ public class Board {
         position[6] = 0;
         position[7] = 0;
         position[8] = 0;
-        rotation[0] = Math.atan(acceleration[1] / acceleration[2]);
-        rotation[1] = Math.atan(acceleration[0] / acceleration[2]);
-        rotation[2] = 0;
+        rotation[0] = Math.atan(acceleration[1] / acceleration[2]); //roll
+        rotation[1] = Math.atan(acceleration[0] / acceleration[2]); //pitch
+        rotation[2] = 0; //yaw
         rotation[3] = 0;
         rotation[4] = 0;
         rotation[5] = 0;
@@ -137,6 +137,11 @@ public class Board {
         position[7] = acceleration[1];
         position[8] = acceleration[2];
         return getAcceleration();
+    }
+    public double[] setTransposedAcceleration(double[] acceleration) {
+        position[6] = Math.cos(-rotation[1])*Math.cos(-rotation[2])*acceleration[0] + (Math.sin(-rotation[1])*Math.cos(-rotation[2])*Math.sin(-rotation[0]) - Math.sin(-rotation[2])*Math.cos(-rotation[0]))*acceleration[1] + (Math.sin(-rotation[1])*Math.cos(-rotation[2])*Math.cos(-rotation[0]) + Math.sin(-rotation[2])*Math.sin(-rotation[0]))*acceleration[2];
+        position[7] = Math.cos(-rotation[1])*Math.sin(-rotation[2])*acceleration[0] + (Math.sin(-rotation[1])*Math.sin(-rotation[2])*Math.sin(-rotation[0]) + Math.cos(-rotation[2])*Math.cos(-rotation[0]))*acceleration[1] + (Math.sin(-rotation[1])*Math.sin(-rotation[2])*Math.cos(-rotation[0]) - Math.cos(-rotation[2])*Math.sin(-rotation[0]))*acceleration[2];
+        position[8] = Math.cos(-rotation[1])*Math.sin(-rotation[0])*acceleration[1] - Math.sin(-rotation[1])*acceleration[0] + Math.cos(-rotation[1])*Math.cos(-rotation[0])*acceleration[2];
     }
     public double[] setPosition(double[] position) {
         this.position[0] = position[0];
