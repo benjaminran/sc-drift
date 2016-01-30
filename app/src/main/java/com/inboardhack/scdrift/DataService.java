@@ -3,7 +3,9 @@ package com.inboardhack.scdrift;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.support.annotation.Nullable;
 
 /**
@@ -11,6 +13,7 @@ import android.support.annotation.Nullable;
  */
 public class DataService extends Service {
 
+    private Handler uiHandler;
     private DataServiceBinder binder;
     private DataThread dataThread;
 
@@ -34,6 +37,10 @@ public class DataService extends Service {
     }
 
     public VelocityMeter getVelocityMeter() { return dataThread.getVelocityMeter(); }
+    public Looper getDataThreadLooper() { return dataThread.mHandler.getLooper(); }
+
+    public Handler getUiHandler() { return uiHandler; }
+    public void setUiHandler(Handler uiHandler) { this.uiHandler = uiHandler; }
 
     public class DataServiceBinder extends Binder {
         DataService getService() {
