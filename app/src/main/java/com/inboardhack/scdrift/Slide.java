@@ -1,3 +1,5 @@
+package com.inboardhack.scdrift;
+
 public class Slide {
 
     private int score;

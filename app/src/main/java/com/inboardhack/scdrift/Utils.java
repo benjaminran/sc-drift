@@ -1,3 +1,5 @@
+package com.inboardhack.scdrift;
+
 public class Utils {
 
     public static final double MINSLIDESTRENGTH = 0;
@@ -7,4 +9,4 @@ public class Utils {
         double slideStrength = Math.abs(caaccel) - Math.abs(acceleration[1]);
         return (slideStrength > MINSLIDESTRENGTH);
     }
-} 
+}
