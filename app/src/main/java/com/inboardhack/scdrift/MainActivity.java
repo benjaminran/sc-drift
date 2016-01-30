@@ -13,6 +13,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -33,26 +34,16 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         initUi();
         scoreViewUpdater = new ScoreViewUpdater(new Handler(), scoreView);
         scoreViewUpdater.run();
-
         Intent intent = new Intent(this, DataService.class);
         startService(intent);
         bindService(intent, this, 0);
-
-        /*FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });*/
     }
 
     private void registerForLocation() {
         LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         LocationListener locationListener = dataService.getVelocityMeter();
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener, dataService.getDataThreadLooper());
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener, dataService.getDataThreadLooper());
     }
 
     private void initUi() {
@@ -62,38 +53,31 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-//        getMenuInflater().inflate(R.menu.menu_main, menu);
+        getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }
-
         return super.onOptionsItemSelected(item);
-    }
-
-    private void registerSpeedListener() {
-        dataService.getVelocityMeter().registerObserver(scoreView);
     }
 
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
+        Log.d("scd", "DataService connected");
         dataService = ((DataService.DataServiceBinder) service).getService();
+        dataService.setUiHandler(new Handler(getMainLooper()));
         registerForLocation();
-        registerSpeedListener();
+        dataService.getVelocityMeter().registerObserver(scoreView);
     }
 
     @Override
     public void onServiceDisconnected(ComponentName name) {
-
+        Log.d("scd", "DataService disconnected");
     }
 }

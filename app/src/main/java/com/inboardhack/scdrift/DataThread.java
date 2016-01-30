@@ -15,8 +15,9 @@ public class DataThread extends Thread {
     private VelocityMeter velocityMeter;
 
     public DataThread(DataService dataService) {
+        super("DataThread");
         this.dataService = dataService;
-        velocityMeter = new VelocityMeter();
+        velocityMeter = new VelocityMeter(dataService);
     }
 
     public VelocityMeter getVelocityMeter() { return velocityMeter; }

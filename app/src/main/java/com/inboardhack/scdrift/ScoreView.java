@@ -36,16 +36,16 @@ public class ScoreView extends RelativeLayout implements Observer {
         setGravity(CENTER_IN_PARENT);
         score = new Score();
         scoreView = new TextView(context);
-        scoreView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 72);
+        scoreView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
         scoreLabel = new TextView(context);
-        scoreLabel.setText("Speed:");
+        scoreLabel.setText("Score:");
         //update(); // TODO
-        addView(scoreView);
-        addView(scoreLabel);
+//        addView(scoreView);
+//        addView(scoreLabel);
     }
 
-    public void updateSpeed(double speed) {
-        scoreView.setText(""+speed);
+    public void updateSpeed(double speed, double bearing, double altitude) {
+        scoreView.setText(String.format("%.5f\n%.2f\n%.2f", speed, bearing, altitude));
     }
 
     public void update() {
@@ -70,7 +70,8 @@ public class ScoreView extends RelativeLayout implements Observer {
     }
 
     @Override
-    public void notify(double speed) {
-        updateSpeed(speed);
+    public void notify(double v, double bearing, double altitude) {
+        double speed = v;//Math.sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
+        updateSpeed(speed, bearing, altitude);
     }
 }

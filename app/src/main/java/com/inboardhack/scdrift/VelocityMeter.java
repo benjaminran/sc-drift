@@ -1,9 +1,6 @@
 package com.inboardhack.scdrift;
 
-import android.content.Context;
-import android.hardware.Sensor;
-import android.hardware.SensorManager;
-import android.location.Criteria;
+import android.app.Activity;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -17,11 +14,19 @@ import java.util.ArrayList;
  */
 public class VelocityMeter implements LocationListener {
 
+    private DataService dataService;
+
     private LocationManager locationManager;
     private ArrayList<Observer> observers;
 
-    public VelocityMeter() {
+    private double lastAltitude;
+    private double lastTime;
+
+    public VelocityMeter(DataService dataService) {
         observers = new ArrayList<Observer>();
+        lastAltitude = 0;
+        lastTime = System.currentTimeMillis();
+        this.dataService = dataService;
     }
 
     public void registerObserver(Observer observer) {
@@ -31,9 +36,25 @@ public class VelocityMeter implements LocationListener {
     @Override
     public void onLocationChanged(Location location) {
         // update with new location
-        for(Observer observer : observers) {
-            observer.notify(location.getSpeed());
+        if(!location.hasSpeed() || !location.hasBearing() || !location.hasAltitude())
+            Log.w("scd", "hasSpeed: "+location.hasSpeed()+"; hasBearing: "+location.hasBearing()+"; hasAltitude: "+location.hasAltitude());
+        final double speed = location.getSpeed();
+        final double bearing = location.getBearing();
+        final double altitude = location.getAltitude();
+        long time = location.getTime();
+        Log.d("scd", "dt = "+(time-lastTime));
+        Log.d("scd", "current thread: "+Thread.currentThread());
+        for(final Observer observer : observers) {
+            dataService.getUiHandler().post(new Runnable() {
+                @Override
+                public void run() {
+                    observer.notify(speed, bearing, altitude);
+                }
+            });
         }
+
+        lastAltitude = altitude;
+        lastTime = time;
     }
 
     @Override

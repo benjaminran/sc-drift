@@ -1,3 +1,4 @@
+/*
 package com.inboardhack.scdrift
 
 public class Board {
@@ -9,7 +10,9 @@ public class Board {
     private float initBearing = 0.0;
     public static final double MINSLIDESTRENGTH = 0;
 
-    public Board(double[] acceleration /* contains gravity */) {
+    public Board(double[] acceleration */
+/* contains gravity *//*
+) {
         position[0] = 0;
         position[1] = 0;
         position[2] = 0;
@@ -222,3 +225,4 @@ public class Board {
         ret[2] = da / dt;
     }
 }
+*/
