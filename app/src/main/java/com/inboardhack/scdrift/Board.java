@@ -7,6 +7,7 @@ public class Board {
     private double[] oldPosition = new double[9];
     private long lastUpdate = 0;
     private float initBearing = 0.0;
+    private Slide lastSlide;
     public static final double MINSLIDESTRENGTH = 0;
 
     public Board(double[] acceleration /* contains gravity */) {
@@ -208,11 +209,21 @@ public class Board {
         this.rotation[8] = rotation[8];
         return getRotation();
     }
-    public boolean isSliding() {
+    public Slide newSlide(long timems) {
         double speed = Math.sqrt(Math.pow(position[3],2)+Math.pow(position[4],2)+Math.pow(position[5],2));
+        if (isSliding(speed) && (lastSlide.isComplete() || lastSlide == null)) {
+            lastSlide = new Slide(speed, timems, this);
+            return lastSlide;
+        }
+        return null;
+    }
+    public boolean isSliding(double speed) {
         double caaccel = speed * rotation[5];
         double slideStrength = Math.abs(caaccel) - Math.abs(position[7]);
         return (slideStrength > MINSLIDESTRENGTH);
+    }
+    public Slide getLastSlide() {
+        return lastSlide();
     }
     public double[] computeVelocity(float speed, float bearing, double da, double dt) {
         double[] ret = new double[3];
