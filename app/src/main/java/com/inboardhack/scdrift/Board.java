@@ -1,5 +1,4 @@
-/*
-package com.inboardhack.scdrift
+package com.inboardhack.scdrift;
 
 public class Board {
 
@@ -7,12 +6,10 @@ public class Board {
     private double[] rotation = new double[9];
     private double[] oldPosition = new double[9];
     private long lastUpdate = 0;
-    private float initBearing = 0.0;
+    private float initBearing = 0.0f;
     public static final double MINSLIDESTRENGTH = 0;
 
-    public Board(double[] acceleration */
-/* contains gravity *//*
-) {
+    public Board(double[] acceleration /* contains gravity */) {
         position[0] = 0;
         position[1] = 0;
         position[2] = 0;
@@ -46,7 +43,7 @@ public class Board {
         if (bearing != 0.0)
             initBearing = bearing;
         else
-            return null;
+            return 0;
         return initBearing;
     }
 
@@ -176,10 +173,11 @@ public class Board {
         return getPosition();
     }
     public double[] updatePosition(double[] acceleration, double[] GPSVelocity, double[] GPSDisplacement, long timems) {
-        setAcceleration(acceleration);
+        setTransposedAcceleration(acceleration);
         updateVelocity(GPSVelocity, timems);
         updateDisplacement(GPSDisplacement, timems);
         lastUpdate = timems;
+        return getPosition();
     }
     public double[] setOrientation(double[] orientation) {
         rotation[0] = orientation[0];
@@ -219,10 +217,10 @@ public class Board {
     }
     public double[] computeVelocity(float speed, float bearing, double da, double dt) {
         double[] ret = new double[3];
-        dir = Math.toRadians((bearing - initBearing) % 360);
+        double dir = Math.toRadians((bearing - initBearing) % 360);
         ret[0] = speed * Math.cos(dir);
         ret[1] = speed * Math.sin(dir);
         ret[2] = da / dt;
+        return ret;
     }
 }
-*/
