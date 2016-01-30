@@ -285,17 +285,23 @@ public class Board implements Observer {
         if(origin instanceof BluetoothBridge) {
             BluetoothBridge bridge = dataService.bridge;
 
-            double[] velocity = computeVelocity(dataService.getVelocityMeter().speed,
-                    dataService.getVelocityMeter().bearing, dataService.getVelocityMeter().da,
-                    dataService.getVelocityMeter().dt);
-            updatePosition(bridge.getAccelerometerData(), velocity, new double[]{0, 0, 0}, System.currentTimeMillis()); // TODO: time of bridge or location reading?
+            double[] velocity = computeVelocity(dataService.getVelocityMeter().speed, dataService.getVelocityMeter().bearing, dataService.getVelocityMeter().da, dataService.getVelocityMeter().dt);
+            updatePosition(bridge.getAccelerometerData(), velocity, new double[]{0, 0, 0}, System.currentTimeMillis()); // TODO: time of bridge or location reading? TODO: world accel, real accel
             setRotation(bridge.getOrientationData());
             Slide slide = newSlide(System.currentTimeMillis());
-            if(slide==null){
-                getLastSlide().incrementScore(velocity, getDirection(), bridge.getAccelerometerData());
+            if(slide==null && getLastSlide()!=null){ // just started sliding
+                getLastSlide().incrementScore(velocity, getDirection(), bridge.getAccelerometerData()); // TODO: real accel not world accel
             }
-            else { // not sliding
+            else if(getLastSlide()==null) { // not sliding
+                return;
+            }
+            else if(slide!=null) { // in process of sliding
+                slide.incrementScore(velocity, getDirection(), bridge.getAccelerometerData()); // TODO: real accel not world accel
+            }
 
+            if(lastSlide!=null && getLastSlide().isComplete()){ // just finished
+                SlideHistory.getInstance().add(getLastSlide());
+                lastSlide = null;
             }
         }
         else if(origin instanceof VelocityMeter) {
