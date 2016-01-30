@@ -13,6 +13,7 @@ public class Board implements Observer {
     private double[] position = new double[9];
     private double[] rotation = new double[9];
     private double[] oldPosition = new double[9];
+    private double[] realAccel = new double[3];
     private long lastUpdate = 0;
     private Slide lastSlide;
     private float initBearing = 0.0f;
@@ -49,6 +50,9 @@ public class Board implements Observer {
         oldPosition[6] = 0;
         oldPosition[7] = 0;
         oldPosition[8] = 0;
+        realAccel[0] = 0;
+        realAccel[1] = 0;
+        realAccel[2] = 0;
         lastUpdate = 0;
     }
 
@@ -90,6 +94,10 @@ public class Board implements Observer {
     }
     public double[] getAcceleration() {
         double[] ret = {position[6], position[7], position[8]};
+        return ret;
+    }
+    public double[] getRealAcceleration() {
+        double[] ret = {realAccel[0], realAccle[1], realAccel[2]};
         return ret;
     }
     public double[] getPosition() {
@@ -187,11 +195,14 @@ public class Board implements Observer {
         position[8] = acceleration[2];
         return getAcceleration();
     }
-    public double[] setTransposedAcceleration(double[] acceleration) {
-        position[6] = Math.cos(-rotation[1])*Math.cos(-rotation[2])*acceleration[0] + (Math.sin(-rotation[1])*Math.cos(-rotation[2])*Math.sin(-rotation[0]) - Math.sin(-rotation[2])*Math.cos(-rotation[0]))*acceleration[1] + (Math.sin(-rotation[1])*Math.cos(-rotation[2])*Math.cos(-rotation[0]) + Math.sin(-rotation[2])*Math.sin(-rotation[0]))*acceleration[2];
-        position[7] = Math.cos(-rotation[1])*Math.sin(-rotation[2])*acceleration[0] + (Math.sin(-rotation[1])*Math.sin(-rotation[2])*Math.sin(-rotation[0]) + Math.cos(-rotation[2])*Math.cos(-rotation[0]))*acceleration[1] + (Math.sin(-rotation[1])*Math.sin(-rotation[2])*Math.cos(-rotation[0]) - Math.cos(-rotation[2])*Math.sin(-rotation[0]))*acceleration[2];
-        position[8] = Math.cos(-rotation[1])*Math.sin(-rotation[0])*acceleration[1] - Math.sin(-rotation[1])*acceleration[0] + Math.cos(-rotation[1])*Math.cos(-rotation[0])*acceleration[2];
-        return getAcceleration();
+    public double[] setRealAcceleration(double[] acceleration) {
+        //position[6] = Math.cos(-rotation[1])*Math.cos(-rotation[2])*acceleration[0] + (Math.sin(-rotation[1])*Math.cos(-rotation[2])*Math.sin(-rotation[0]) - Math.sin(-rotation[2])*Math.cos(-rotation[0]))*acceleration[1] + (Math.sin(-rotation[1])*Math.cos(-rotation[2])*Math.cos(-rotation[0]) + Math.sin(-rotation[2])*Math.sin(-rotation[0]))*acceleration[2];
+        //position[7] = Math.cos(-rotation[1])*Math.sin(-rotation[2])*acceleration[0] + (Math.sin(-rotation[1])*Math.sin(-rotation[2])*Math.sin(-rotation[0]) + Math.cos(-rotation[2])*Math.cos(-rotation[0]))*acceleration[1] + (Math.sin(-rotation[1])*Math.sin(-rotation[2])*Math.cos(-rotation[0]) - Math.cos(-rotation[2])*Math.sin(-rotation[0]))*acceleration[2];
+        //position[8] = Math.cos(-rotation[1])*Math.sin(-rotation[0])*acceleration[1] - Math.sin(-rotation[1])*acceleration[0] + Math.cos(-rotation[1])*Math.cos(-rotation[0])*acceleration[2];
+        realAccel[0] = acceleration[0];
+        realAccel[1] = acceleration[1];
+        realAccel[2] = acceleration[2];
+        return getRealAcceleration();
     }
     public double[] setPosition(double[] position) {
         this.position[0] = position[0];
@@ -205,8 +216,9 @@ public class Board implements Observer {
         this.position[8] = position[8];
         return getPosition();
     }
-    public double[] updatePosition(double[] acceleration, double[] GPSVelocity, double[] GPSDisplacement, long timems) {
-        setTransposedAcceleration(acceleration);
+    public double[] updatePosition(double[] worldaccel, double[] realaccel, double[] GPSVelocity, double[] GPSDisplacement, long timems) {
+        setAcceleration(worldaccel);
+        setRealAcceleration(realaccel);
         updateVelocity(GPSVelocity, timems);
         updateDisplacement(GPSDisplacement, timems);
         lastUpdate = timems;
@@ -253,7 +265,7 @@ public class Board implements Observer {
     }
     public boolean isSliding(double speed) {
         double caaccel = speed * rotation[5];
-        double slideStrength = Math.abs(caaccel) - Math.abs(position[7]);
+        double slideStrength = Math.abs(caaccel) - Math.abs(realAccel[1]);
         return (slideStrength > MINSLIDESTRENGTH);
     }
     public Slide getLastSlide() {
