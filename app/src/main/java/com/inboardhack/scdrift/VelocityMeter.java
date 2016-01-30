@@ -28,6 +28,13 @@ public class VelocityMeter implements LocationListener, android.location.Locatio
     private boolean registeredForLocation;
     private ArrayList<Observer> observers;
 
+    public float speed;
+    public float bearing;
+    public double da;
+    public double dt;
+
+    public Location location;
+
     private double lastAltitude;
     private double lastTime;
 
@@ -43,7 +50,7 @@ public class VelocityMeter implements LocationListener, android.location.Locatio
         observers.add(observer);
     }
 
-    public void registerForLocationIfNeeded(Activity activity) {
+    public void registerForLocationIfNeeded2(Activity activity) {
         /*LocationManager locationManager = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
         LocationListener locationListener = dataService.getVelocityMeter();
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener, dataService.getDataThreadLooper());
@@ -58,7 +65,9 @@ public class VelocityMeter implements LocationListener, android.location.Locatio
         }
     }
 
-    public void registerForLocationIfNeeded2(Activity activity) {
+    public void registerForLocationIfNeeded(Activity activity) {
+        if(registeredForLocation) return;
+        registeredForLocation = true;
         LocationManager locationManager = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
         android.location.LocationListener locationListener = dataService.getVelocityMeter();
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener, dataService.getDataThreadLooper());
@@ -92,6 +101,7 @@ public class VelocityMeter implements LocationListener, android.location.Locatio
 
     @Override
     public void onLocationChanged(Location location) {
+        this.location = location;
         // update with new location
         if(!location.hasSpeed() || !location.hasBearing() || !location.hasAltitude())
             Log.w("scd", "hasSpeed: "+location.hasSpeed()+"; hasBearing: "+location.hasBearing()+"; hasAltitude: "+location.hasAltitude());
@@ -105,7 +115,7 @@ public class VelocityMeter implements LocationListener, android.location.Locatio
             dataService.getUiHandler().post(new Runnable() {
                 @Override
                 public void run() {
-                    observer.notify(speed, bearing, altitude);
+                    observer.observeUpdate(this);
                 }
             });
         }

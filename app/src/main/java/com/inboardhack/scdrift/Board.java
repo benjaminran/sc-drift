@@ -3,9 +3,12 @@ package com.inboardhack.scdrift;
 import android.text.TextUtils;
 import android.util.Log;
 
-public class Board {
+public class Board implements Observer {
 
     public static Board instance = null;
+    private DataService dataService;
+
+    private double[] latestGPSVelocity;
 
     private double[] position = new double[9];
     private double[] rotation = new double[9];
@@ -15,7 +18,10 @@ public class Board {
     private float initBearing = 0.0f;
     public static final double MINSLIDESTRENGTH = 0;
 
-    private Board(double[] acceleration /* contains gravity */) {
+    /* must be called at a point when gravity vector is available */
+    private Board(DataService dataService) {
+        dataService.bridge.registerObserver(this);
+        double[] acceleration = dataService.bridge.getAccelerometerDataWithGravity(); // initialize with gravity vector
         position[0] = 0;
         position[1] = 0;
         position[2] = 0;
@@ -54,13 +60,14 @@ public class Board {
         Log.d("scd", "initBearing: " + initBearing);
     }
 
-    public static Board getInstance(double[] acceleration) {
+    public static Board getInstance(DataService dataService) {
         if(instance==null) {
-            instance = new Board(acceleration);
+            instance = new Board(dataService);
         }
         return instance;
     }
 
+    /* must not be called before getInstance(DataService) has been called */
     public static Board getInstance() {
         return Board.getInstance(null);
     }
@@ -250,7 +257,7 @@ public class Board {
         return (slideStrength > MINSLIDESTRENGTH);
     }
     public Slide getLastSlide() {
-        return lastSlide();
+        return lastSlide;
     }
     public double[] computeVelocity(float speed, float bearing, double da, double dt) {
         double[] ret = new double[3];
@@ -259,5 +266,28 @@ public class Board {
         ret[1] = speed * Math.sin(dir);
         ret[2] = da / dt;
         return ret;
+    }
+
+    @Override
+    public void observeUpdate(Object origin) {
+        if(origin instanceof BluetoothBridge) {
+            BluetoothBridge bridge = dataService.bridge;
+
+            double[] velocity = computeVelocity(dataService.getVelocityMeter().speed,
+                    dataService.getVelocityMeter().bearing, dataService.getVelocityMeter().da,
+                    dataService.getVelocityMeter().dt);
+            updatePosition(bridge.getAccelerometerData(), velocity, new double[]{0, 0, 0}, System.currentTimeMillis()); // TODO: time of bridge or location reading?
+            setRotation(bridge.getOrientationData());
+            Slide slide = newSlide(System.currentTimeMillis());
+            if(slide==null){
+                getLastSlide().incrementScore(velocity, getDirection(), bridge.getAccelerometerData());
+            }
+            else { // not sliding
+
+            }
+        }
+        else if(origin instanceof VelocityMeter) {
+
+        }
     }
 }

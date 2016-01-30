@@ -1,10 +1,6 @@
 package com.inboardhack.scdrift;
 
-import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
@@ -16,16 +12,13 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
-
 public class StartActivity extends AppCompatActivity implements View.OnClickListener, Observer {
 
     private int stage;
 
-    private BluetoothBridge bridge;
+    private Board board;
+
+
     private DataService dataService;
     private DataServiceConnection serviceConnection;
 
@@ -39,8 +32,6 @@ public class StartActivity extends AppCompatActivity implements View.OnClickList
         Toolbar toolbar = (Toolbar) findViewById(R.id.start_toolbar);
         setSupportActionBar(toolbar);
 
-        bridge = BluetoothBridge.getInstance(this);
-
         stage = 1;
 
         button = (Button) findViewById(R.id.start_button);
@@ -52,6 +43,19 @@ public class StartActivity extends AppCompatActivity implements View.OnClickList
         Intent intent = new Intent(this, DataService.class);
         startService(intent);
         bindService(intent, serviceConnection, 0);
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(dataService!=null) dataService.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if(dataService!=null) dataService.onPause();
     }
 
     @Override
@@ -71,24 +75,26 @@ public class StartActivity extends AppCompatActivity implements View.OnClickList
         return super.onOptionsItemSelected(item);
     }
 
-
-
     private boolean notMoving() {
         return true; // TODO: confirm that not moving
     }
 
     @Override
     public void onClick(View v) {
+        if(dataService==null) {
+            Toast.makeText(this, "Please wait, data service still initializing", Toast.LENGTH_LONG).show();
+        }
         if(stage==1) {
-            if(notMoving()) {
-
+            if(notMoving() && dataService!=null) {
+                board = Board.getInstance(dataService);
                 button.setText("Finish");
                 directions.setText("Ride your board straight forward then click the button again and you're done.");
                 stage++;
             }
         }
         else if(stage==2) {
-            // finish callibration
+            // TODO: finish callibration
+            board.calibrate(dataService.getVelocityMeter().bearing);
             Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
             finish();
@@ -96,11 +102,10 @@ public class StartActivity extends AppCompatActivity implements View.OnClickList
     }
 
     @Override
-    public void notify(double velocity, double bearing, double altitude) {}
-
-    @Override
-    public void notifyUpdated() {
+    public void observeUpdate(Object origin) { // onServiceBound
         dataService = serviceConnection.dataService;
+        dataService.bridge = BluetoothBridge.getInstance(this, dataService.dataThread.mHandler);
+        dataService.bridge.run();
         dataService.getVelocityMeter().registerForLocationIfNeeded(this);
     }
 }

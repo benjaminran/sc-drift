@@ -56,7 +56,7 @@ public class ScoreView extends RelativeLayout implements Observer {
         double speed = 0;
         boolean isSliding = false;//Utils.isSliding(acceleration, velocity, speed);
         if(currentSlide==null && isSliding) {
-            currentSlide = new Slide();
+//            currentSlide = new Slide();
         }
         else if(currentSlide!=null && isSliding) {
 //            currentSlide.incrementScore(velocity, rotation, acceleration);
@@ -71,13 +71,10 @@ public class ScoreView extends RelativeLayout implements Observer {
     }
 
     @Override
-    public void notify(double v, double bearing, double altitude) {
-        double speed = v;//Math.sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
+    public void observeUpdate(Object origin) {
+        double speed = 0;
+        double bearing = 0;
+        double altitude = 0;
         updateSpeed(speed, bearing, altitude);
-    }
-
-    @Override
-    public void notifyUpdated() {
-
     }
 }

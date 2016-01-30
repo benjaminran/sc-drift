@@ -33,7 +33,7 @@ public class DataServiceConnection implements ServiceConnection {
         dataService = ((DataService.DataServiceBinder) service).getService();
         dataService.setUiHandler(mainHandler);
         for(Observer observer : observers)
-            observer.notifyUpdated();
+            observer.observeUpdate(this);
     }
 
     @Override

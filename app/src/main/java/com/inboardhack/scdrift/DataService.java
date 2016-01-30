@@ -15,7 +15,18 @@ public class DataService extends Service {
 
     private Handler uiHandler;
     private DataServiceBinder binder;
-    private DataThread dataThread;
+    public DataThread dataThread;
+
+    public DataUpdater dataUpdater;
+    public BluetoothBridge bridge;
+
+    protected void onResume() {
+        if(bridge!=null) bridge.onResume();
+    }
+
+    protected void onPause() {
+        if (bridge!=null) bridge.onPause();
+    }
 
     @Nullable
     @Override
