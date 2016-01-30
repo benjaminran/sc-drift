@@ -19,7 +19,7 @@ public class ScoreViewUpdater implements Runnable {
 
     @Override
     public void run() {
-        update();
+//        update();
         handler.postDelayed(this, UPDATE_PERIOD_MS);
     }
 

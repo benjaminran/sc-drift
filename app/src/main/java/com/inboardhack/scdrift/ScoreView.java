@@ -9,7 +9,7 @@ import android.widget.TextView;
 /**
  * Created by benjaminran on 1/29/16.
  */
-public class ScoreView extends RelativeLayout {
+public class ScoreView extends RelativeLayout implements Observer {
 
     private Score score;
     private TextView scoreView;
@@ -36,9 +36,9 @@ public class ScoreView extends RelativeLayout {
         setGravity(CENTER_IN_PARENT);
         score = new Score();
         scoreView = new TextView(context);
-        scoreView.setTextSize(TypedValue.COMPLEX_UNIT_IN, 1);
+        scoreView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 72);
         scoreLabel = new TextView(context);
-        scoreLabel.setText("Score:");
+        scoreLabel.setText("Speed:");
         //update(); // TODO
         addView(scoreView);
         addView(scoreLabel);
@@ -67,5 +67,10 @@ public class ScoreView extends RelativeLayout {
             // do nothing
         }
         scoreView.setText(""+currentSlide.getScore());
+    }
+
+    @Override
+    public void notify(double speed) {
+        updateSpeed(speed);
     }
 }

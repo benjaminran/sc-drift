@@ -17,19 +17,23 @@ public class DataService extends Service {
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        return new DataServiceBinder();
+        handleIntent(intent);
+        binder = new DataServiceBinder();
+        return binder;
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         handleIntent(intent);
-        return START_STICKY;
+        return START_NOT_STICKY;
     }
 
     private void handleIntent(Intent intent) {
         dataThread = new DataThread(this);
         dataThread.start();
     }
+
+    public VelocityMeter getVelocityMeter() { return dataThread.getVelocityMeter(); }
 
     public class DataServiceBinder extends Binder {
         DataService getService() {

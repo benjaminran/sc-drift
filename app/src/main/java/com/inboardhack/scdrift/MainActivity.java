@@ -1,8 +1,11 @@
 package com.inboardhack.scdrift;
 
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -15,6 +18,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 public class MainActivity extends AppCompatActivity implements ServiceConnection {
+
+    private DataService dataService;
 
     private ScoreView scoreView;
     private ScoreViewUpdater scoreViewUpdater;
@@ -32,6 +37,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         Intent intent = new Intent(this, DataService.class);
         startService(intent);
         bindService(intent, this, 0);
+
         /*FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -40,6 +46,13 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                         .setAction("Action", null).show();
             }
         });*/
+    }
+
+    private void registerForLocation() {
+        LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+        LocationListener locationListener = dataService.getVelocityMeter();
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
     }
 
     private void initUi() {
@@ -68,9 +81,15 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         return super.onOptionsItemSelected(item);
     }
 
+    private void registerSpeedListener() {
+        dataService.getVelocityMeter().registerObserver(scoreView);
+    }
+
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
-
+        dataService = ((DataService.DataServiceBinder) service).getService();
+        registerForLocation();
+        registerSpeedListener();
     }
 
     @Override

@@ -8,38 +8,46 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.Log;
+
+import java.util.ArrayList;
 
 /**
  * Created by benjaminran on 1/29/16.
  */
-public class VelocityMeter {
+public class VelocityMeter implements LocationListener {
 
     private LocationManager locationManager;
+    private ArrayList<Observer> observers;
 
-    public VelocityMeter(Context context) {
-        locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-        LocationListener locationListener = new LocationListener() {
-            @Override
-            public void onLocationChanged(Location location) {
-                // update ui with new speed
-            }
+    public VelocityMeter() {
+        observers = new ArrayList<Observer>();
+    }
 
-            @Override
-            public void onStatusChanged(String provider, int status, Bundle extras) {}
+    public void registerObserver(Observer observer) {
+        observers.add(observer);
+    }
 
-            @Override
-            public void onProviderEnabled(String provider) {}
+    @Override
+    public void onLocationChanged(Location location) {
+        // update with new location
+        for(Observer observer : observers) {
+            observer.notify(location.getSpeed());
+        }
+    }
 
-            @Override
-            public void onProviderDisabled(String provider) {}
-        };
-        Criteria criteria = new Criteria();
-        criteria.setAccuracy(Criteria.ACCURACY_FINE);
-        criteria.setBearingAccuracy(Criteria.ACCURACY_FINE);
-        criteria.setSpeedAccuracy(Criteria.ACCURACY_FINE);
-        locationManager.requestLocationUpdates(100,0f, criteria, locationListener, null);
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
 
     }
 
+    @Override
+    public void onProviderEnabled(String provider) {
 
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+
+    }
 }
