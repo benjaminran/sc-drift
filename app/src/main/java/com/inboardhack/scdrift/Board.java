@@ -283,6 +283,7 @@ public class Board implements Observer {
     @Override
     public void observeUpdate(Object origin) {
         if(origin instanceof BluetoothBridge) {
+            if(dataService==null) return; // TODO: ok?
             BluetoothBridge bridge = dataService.bridge;
 
             double[] velocity = computeVelocity(dataService.getVelocityMeter().speed, dataService.getVelocityMeter().bearing, dataService.getVelocityMeter().da, dataService.getVelocityMeter().dt);
@@ -304,8 +305,6 @@ public class Board implements Observer {
                 lastSlide = null;
             }
         }
-        else if(origin instanceof VelocityMeter) {
-
-        }
+        else if(origin instanceof VelocityMeter) {}
     }
 }

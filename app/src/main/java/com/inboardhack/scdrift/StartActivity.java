@@ -84,7 +84,7 @@ public class StartActivity extends AppCompatActivity implements View.OnClickList
         if(dataService==null) {
             Toast.makeText(this, "Please wait, data service still initializing", Toast.LENGTH_LONG).show();
         }
-        if(stage==1) {
+        if(stage==1) { // starting calibration
             if(notMoving() && dataService!=null) {
                 board = Board.getInstance(dataService);
                 button.setText("Finish");
@@ -92,8 +92,7 @@ public class StartActivity extends AppCompatActivity implements View.OnClickList
                 stage++;
             }
         }
-        else if(stage==2) {
-            // TODO: finish callibration
+        else if(stage==2) { // finish calibration
             board.calibrate(dataService.getVelocityMeter().bearing);
             Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
