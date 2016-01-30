@@ -21,8 +21,9 @@ public class Board implements Observer {
 
     /* must be called at a point when gravity vector is available */
     private Board(DataService dataService) {
+        //TODO: tell gyro this is zero(reinitialize it)
         dataService.bridge.registerObserver(this);
-        double[] acceleration = dataService.bridge.getAccelerometerDataWithGravity(); // initialize with gravity vector
+        double[] acceleration = dataService.bridge.getGravity(); // initialize with gravity vector
         position[0] = 0;
         position[1] = 0;
         position[2] = 0;
