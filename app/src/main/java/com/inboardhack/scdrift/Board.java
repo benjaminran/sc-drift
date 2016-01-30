@@ -1,9 +1,36 @@
+package com.inboardhack.scdrift
+
 public class Board {
 
     private double[] position = new double[9];
     private double[] rotation = new double[9];
     private double[] oldVelocity = new double[3];
     private long lastVelocityUpdate = 0;
+
+    public Board(double[] acceleration /* contains gravity */) {
+        position[0] = 0;
+        position[1] = 0;
+        position[2] = 0;
+        position[3] = 0;
+        position[4] = 0;
+        position[5] = 0;
+        position[6] = 0;
+        position[7] = 0;
+        position[8] = 0;
+        rotation[0] = Math.atan(acceleration[1] / acceleration[2]);
+        rotation[1] = Math.atan(acceleration[0] / acceleration[2]);
+        rotation[2] = 0;
+        rotation[3] = 0;
+        rotation[4] = 0;
+        rotation[5] = 0;
+        rotation[6] = 0;
+        rotation[7] = 0;
+        rotation[8] = 0;
+        oldVelocity[0] = 0;
+        oldVelocity[1] = 0;
+        oldVelocity[2] = 0;
+        lastVelocityUpdate = 0;
+    }
 
     public double[] getDisplacement() {
         double[] ret = {position[0], position[1], position[2]};
@@ -60,7 +87,7 @@ public class Board {
         return getVelocity();
     }
     public double[] setAccurateVelocity(double[] GPSVelocity, long timems) {
-        if (oldVelocity[0] == GPSVelocity[0] && oldVelocity[1] == GPSVelocity[1] && oldVelocity[2] == GPSVelocity[2]) {
+        if ((oldVelocity[0] == GPSVelocity[0] && oldVelocity[1] == GPSVelocity[1] && oldVelocity[2] == GPSVelocity[2]) && (timems - lastVelocityUpdate < 1000)) {
             incrementVelocity(timems);
         } else {
             setVelocity(GPSVelocity);
@@ -98,7 +125,7 @@ public class Board {
         this.position[8] = position[8];
         return getPosition();
     }
-    public double[] setOrientation(double[] orielacement) {
+    public double[] setOrientation(double[] orientation) {
         rotation[0] = orientation[0];
         rotation[1] = orientation[1];
         rotation[2] = orientation[2];
