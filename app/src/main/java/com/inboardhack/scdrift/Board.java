@@ -4,8 +4,8 @@ public class Board {
 
     private double[] position = new double[9];
     private double[] rotation = new double[9];
-    private double[] oldVelocity = new double[3];
-    private long lastVelocityUpdate = 0;
+    private double[] oldPosition = new double[9];
+    private long lastUpdate = 0;
 
     public Board(double[] acceleration /* contains gravity */) {
         position[0] = 0;
@@ -26,10 +26,16 @@ public class Board {
         rotation[6] = 0;
         rotation[7] = 0;
         rotation[8] = 0;
-        oldVelocity[0] = 0;
-        oldVelocity[1] = 0;
-        oldVelocity[2] = 0;
-        lastVelocityUpdate = 0;
+        oldPosition[0] = 0;
+        oldPosition[1] = 0;
+        oldPosition[2] = 0;
+        oldPosition[3] = 0;
+        oldPosition[4] = 0;
+        oldPosition[5] = 0;
+        oldPosition[6] = 0;
+        oldPosition[7] = 0;
+        oldPosition[8] = 0;
+        lastUpdate = 0;
     }
 
     public double[] getDisplacement() {
@@ -70,47 +76,66 @@ public class Board {
         position[2] = displacement[2];
         return getDisplacement();
     }
+    private double[] incrementDisplacement(long timems) {
+        return incrementDisplacement(getVelocity(), timems);
+    }
+    private double[] incrementDisplacement(double[] velocity, long timems) {
+        position[0] += velocity[0] * (timems - lastUpdate) / 1000;
+        position[1] += velocity[1] * (timems - lastUpdate) / 1000;
+        position[2] += velocity[2] * (timems - lastUpdate) / 1000;
+        lastUpdate = timems;
+        return getDisplacement();
+    }
+    public double[] updateDisplacement(double[] GPSDisplacement, long timems) {
+        if ((oldPosition[0] == GPSDisplacement[0] && oldPosition[1] == GPSDisplacement[1] && oldPosition[2] == GPSDisplacement[2]) && (timems - lastUpdate < 1000)) {
+            incrementDisplacement(timems);
+        } else {
+            setDisplacement(GPSDisplacement);
+            lastUpdate = timems;
+        }
+        return getDisplacement();
+    }
     public double[] setVelocity(double[] velocity) {
-        position[3] = velocity[3];
-        position[4] = velocity[4];
-        position[5] = velocity[5];
+        position[3] = velocity[0];
+        position[4] = velocity[1];
+        position[5] = velocity[2];
         return getVelocity();
     }
-    public double[] incrementVelocity(long timems) {
+    private double[] incrementVelocity(long timems) {
         return incrementVelocity(getAcceleration(), timems);
     }
-    public double[] incrementVelocity(double[] acceleration, long timems) {
-        position[3] += acceleration[0] * (timems - lastVelocityUpdate) / 1000;
-        position[4] += acceleration[1] * (timems - lastVelocityUpdate) / 1000;
-        position[5] += acceleration[2] * (timems - lastVelocityUpdate) / 1000;
-        lastVelocityUpdate = timems;
+    private double[] incrementVelocity(double[] acceleration, long timems) {
+        position[3] += acceleration[0] * (timems - lastUpdate) / 1000;
+        position[4] += acceleration[1] * (timems - lastUpdate) / 1000;
+        position[5] += acceleration[2] * (timems - lastUpdate) / 1000;
+        lastUpdate = timems;
         return getVelocity();
     }
-    public double[] setAccurateVelocity(double[] GPSVelocity, long timems) {
-        if ((oldVelocity[0] == GPSVelocity[0] && oldVelocity[1] == GPSVelocity[1] && oldVelocity[2] == GPSVelocity[2]) && (timems - lastVelocityUpdate < 1000)) {
+    public double[] updateVelocity(double[] GPSVelocity, long timems) {
+        if ((oldPosition[3] == GPSVelocity[0] && oldPosition[4] == GPSVelocity[1] && oldPosition[5] == GPSVelocity[2]) && (timems - lastUpdate < 1000)) {
             incrementVelocity(timems);
         } else {
             setVelocity(GPSVelocity);
-            lastVelocityUpdate = timems;
+            lastUpdate = timems;
         }
         return getVelocity();
     }
-    public double[] setAccurateVelocity(double[] GPSVelocity, double[] acceleration, long timems) {
-        if (oldVelocity[0] == GPSVelocity[0] && oldVelocity[1] == GPSVelocity[1] && oldVelocity[2] == GPSVelocity[2]) {
+    public double[] updateVelocity(double[] GPSVelocity, double[] acceleration, long timems) {
+        if (oldPosition[3] == GPSVelocity[0] && oldPosition[4] == GPSVelocity[1] && oldPosition[5] == GPSVelocity[2]) {
             incrementVelocity(acceleration, timems);
         } else {
             setVelocity(GPSVelocity);
-            oldVelocity[0] = GPSVelocity[0];
-            oldVelocity[1] = GPSVelocity[1];
-            oldVelocity[2] = GPSVelocity[2];
-            lastVelocityUpdate = timems;
+            oldPosition[3] = GPSVelocity[0];
+            oldPosition[4] = GPSVelocity[1];
+            oldPosition[5] = GPSVelocity[2];
+            lastUpdate = timems;
         }
         return getVelocity();
     }
     public double[] setAcceleration(double[] acceleration) {
-        position[6] = acceleration[6];
-        position[7] = acceleration[7];
-        position[8] = acceleration[8];
+        position[6] = acceleration[0];
+        position[7] = acceleration[1];
+        position[8] = acceleration[2];
         return getAcceleration();
     }
     public double[] setPosition(double[] position) {
@@ -125,22 +150,28 @@ public class Board {
         this.position[8] = position[8];
         return getPosition();
     }
+    public double[] updatePosition(double[] acceleration, double[] GPSVelocity, double[] GPSDisplacement, long timems) {
+        setAcceleration(acceleration);
+        updateVelocity(GPSVelocity, timems);
+        updateDisplacement(GPSDisplacement, timems);
+        lastUpdate = timems;
+    }
     public double[] setOrientation(double[] orientation) {
         rotation[0] = orientation[0];
         rotation[1] = orientation[1];
         rotation[2] = orientation[2];
         return getOrientation();
     }
-    public double[] setAngularVelocity(double[] AngularVelocity) {
-        rotation[3] = AngularVelocity[3];
-        rotation[4] = AngularVelocity[4];
-        rotation[5] = AngularVelocity[5];
+    public double[] setAngularVelocity(double[] angularVelocity) {
+        rotation[3] = angularVelocity[0];
+        rotation[4] = angularVelocity[1];
+        rotation[5] = angularVelocity[2];
         return getAngularVelocity();
     }
     public double[] setAngularAcceleration(double[] angularAcceleration) {
-        rotation[6] = angularAcceleration[6];
-        rotation[7] = angularAcceleration[7];
-        rotation[8] = angularAcceleration[8];
+        rotation[6] = angularAcceleration[0];
+        rotation[7] = angularAcceleration[1];
+        rotation[8] = angularAcceleration[2];
         return getAngularAcceleration();
     }
     public double[] setRotation(double[] rotation) {
