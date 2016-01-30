@@ -22,8 +22,6 @@ public class BluetoothBridge implements SensorEventListener, Runnable {
     private SensorManager mSensorManager;
     private Sensor accelerometer, gyroscope, gravity;
 
-    private Location oldLocation;
-
     private double[] accelerometerData, gyroscopeData, gravityData;
 
     private BluetoothBridge(Context context, Handler mHandler) {
@@ -41,7 +39,6 @@ public class BluetoothBridge implements SensorEventListener, Runnable {
     public void registerObserver(Observer o) {
         if(observers==null) observers = new ArrayList<>();
         observers.add(o);
-
     }
 
     // must be called first
@@ -78,7 +75,7 @@ public class BluetoothBridge implements SensorEventListener, Runnable {
     public double[] getWorldAccel() {
         return accelerometerData;
     } // TODO: adjust
-    public double[] getAccelerometerDataWithGravity() { mSensorManager.unregisterListener(this, gravity); return gravityData; }
+    public double[] getGravity() { mSensorManager.unregisterListener(this, gravity); return gravityData; }
     public double[] getOrientationData() { return gyroscopeData; } // TODO: length 9
     public double[] getAngularVelocityData() {
         return null; // TODO

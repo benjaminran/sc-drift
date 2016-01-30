@@ -8,8 +8,6 @@ public class Board implements Observer {
     public static Board instance = null;
     private DataService dataService;
 
-    private double[] latestGPSVelocity;
-
     private double[] position = new double[9];
     private double[] rotation = new double[9];
     private double[] oldPosition = new double[9];
@@ -21,7 +19,6 @@ public class Board implements Observer {
 
     /* must be called at a point when gravity vector is available */
     private Board(DataService dataService) {
-        //TODO: tell gyro this is zero(reinitialize it)
         dataService.bridge.registerObserver(this);
         double[] acceleration = dataService.bridge.getGravity(); // initialize with gravity vector
         position[0] = 0;
@@ -33,8 +30,8 @@ public class Board implements Observer {
         position[6] = 0;
         position[7] = 0;
         position[8] = 0;
-        rotation[0] = Math.atan(acceleration[1] / acceleration[2]); //roll
-        rotation[1] = Math.atan(acceleration[0] / acceleration[2]); //pitch
+        rotation[0] = 0; //roll
+        rotation[1] = 0; //pitch
         rotation[2] = 0; //yaw
         rotation[3] = 0;
         rotation[4] = 0;
@@ -55,6 +52,7 @@ public class Board implements Observer {
         realAccel[1] = 0;
         realAccel[2] = 0;
         lastUpdate = 0;
+        // TODO: reinitialize gyro
     }
 
     private void logBoard() {
