@@ -5,6 +5,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.location.Location;
 import android.os.Handler;
 
 import java.util.ArrayList;
@@ -14,13 +15,14 @@ import java.util.ArrayList;
  */
 public class BluetoothBridge implements SensorEventListener, Runnable {
 
-    private static final int UPDATE_PERIOD_MS = 10;
     private ArrayList<Observer> observers;
 
     private static BluetoothBridge instance = null;
     private Handler mHandler;
     private SensorManager mSensorManager;
     private Sensor accelerometer, gyroscope, gravity;
+
+    private Location oldLocation;
 
     private double[] accelerometerData, gyroscopeData, gravityData;
 
@@ -57,23 +59,25 @@ public class BluetoothBridge implements SensorEventListener, Runnable {
     public void onSensorChanged(SensorEvent event) {
         if(event.sensor==accelerometer) {
             accelerometerData[0] = event.values[0];
-            accelerometerData[1] = event.values[1];
+            accelerometerData[1] = event.values[1] * -1;
             accelerometerData[2] = event.values[2];
         }
         else if(event.sensor==gyroscope) {
             gyroscopeData[0] = event.values[0];
-            gyroscopeData[1] = event.values[1];
+            gyroscopeData[1] = event.values[1] * -1;
             gyroscopeData[2] = event.values[2];
         }
         else if(event.sensor==gravity) {
             gravityData[0] = event.values[0];
-            gravityData[1] = event.values[1];
+            gravityData[1] = event.values[1] * -1;
             gravityData[2] = event.values[2];
         }
     }
 
     public double[] getRealAccel() { return accelerometerData; }
-    public double[] getWorldAccel() { return accelerometerData; }
+    public double[] getWorldAccel() {
+        return accelerometerData;
+    } // TODO: adjust
     public double[] getAccelerometerDataWithGravity() { mSensorManager.unregisterListener(this, gravity); return gravityData; }
     public double[] getOrientationData() { return gyroscopeData; } // TODO: length 9
     public double[] getAngularVelocityData() {
