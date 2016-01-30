@@ -5,4 +5,5 @@ package com.inboardhack.scdrift;
  */
 public interface Observer {
     void notify(double velocity, double bearing, double altitude);
+    void notifyUpdated();
 }

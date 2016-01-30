@@ -19,11 +19,29 @@ public class ScoreViewUpdater implements Runnable {
 
     @Override
     public void run() {
-//        update();
+        update();
         handler.postDelayed(this, UPDATE_PERIOD_MS);
     }
 
     private void update() {
-        scoreView.update();
+        double[] acceleration = null;
+        double[] velocity = null;
+        double[] rotation = null;
+        double speed = 0;
+
+       /* boolean isSliding = Utils.isSliding(acceleration, velocity, speed);
+        if(currentSlide==null && isSliding) {
+            currentSlide = new Slide();
+        }
+        else if(currentSlide!=null && isSliding) {
+            currentSlide.incrementScore(velocity, rotation, acceleration);
+        }
+        else if(currentSlide!=null && !isSliding) {
+            SlideHistory.getInstance().add(currentSlide);
+        }
+        else { // currentSlide==null && !isSliding
+            // do nothing
+        }*/
+//        scoreView.update();
     }
 }

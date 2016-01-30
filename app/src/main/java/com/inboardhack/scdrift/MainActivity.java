@@ -18,8 +18,9 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class MainActivity extends AppCompatActivity implements ServiceConnection {
+public class MainActivity extends AppCompatActivity implements Observer {
 
+    private DataServiceConnection serviceConnection;
     private DataService dataService;
 
     private ScoreView scoreView;
@@ -36,14 +37,9 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         scoreViewUpdater.run();
         Intent intent = new Intent(this, DataService.class);
         startService(intent);
-        bindService(intent, this, 0);
-    }
-
-    private void registerForLocation() {
-        LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-        LocationListener locationListener = dataService.getVelocityMeter();
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener, dataService.getDataThreadLooper());
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener, dataService.getDataThreadLooper());
+        serviceConnection = new DataServiceConnection(new Handler(getMainLooper()));
+        serviceConnection.registerObserver(this);
+        bindService(intent, serviceConnection, 0);
     }
 
     private void initUi() {
@@ -68,16 +64,12 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     }
 
     @Override
-    public void onServiceConnected(ComponentName name, IBinder service) {
-        Log.d("scd", "DataService connected");
-        dataService = ((DataService.DataServiceBinder) service).getService();
-        dataService.setUiHandler(new Handler(getMainLooper()));
-        registerForLocation();
-        dataService.getVelocityMeter().registerObserver(scoreView);
-    }
+    public void notify(double velocity, double bearing, double altitude) {}
 
     @Override
-    public void onServiceDisconnected(ComponentName name) {
-        Log.d("scd", "DataService disconnected");
+    public void notifyUpdated() {
+        dataService = serviceConnection.dataService;
+        dataService.getVelocityMeter().registerForLocationIfNeeded(this);
+        dataService.getVelocityMeter().registerObserver(scoreView);
     }
 }

@@ -12,13 +12,15 @@
     <com.inboardhack.scdrift.ScoreView
         android:id="@+id/score_view"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"/>
 
     <LinearLayout
         android:id="@+id/slides_header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:layout_below="@+id/score_view">
 
         <TextView android:id="@+id/slide_score_header"
             android:layout_height="wrap_content"

@@ -32,8 +32,10 @@ public class DataService extends Service {
     }
 
     private void handleIntent(Intent intent) {
-        dataThread = new DataThread(this);
-        dataThread.start();
+        if(dataThread==null) {
+            dataThread = new DataThread(this);
+            dataThread.start();
+        }
     }
 
     public VelocityMeter getVelocityMeter() { return dataThread.getVelocityMeter(); }

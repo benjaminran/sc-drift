@@ -1,6 +1,11 @@
 package com.inboardhack.scdrift;
 
+import android.text.TextUtils;
+import android.util.Log;
+
 public class Board {
+
+    public static Board instance = null;
 
     private double[] position = new double[9];
     private double[] rotation = new double[9];
@@ -10,7 +15,7 @@ public class Board {
     private float initBearing = 0.0f;
     public static final double MINSLIDESTRENGTH = 0;
 
-    public Board(double[] acceleration /* contains gravity */) {
+    private Board(double[] acceleration /* contains gravity */) {
         position[0] = 0;
         position[1] = 0;
         position[2] = 0;
@@ -40,6 +45,26 @@ public class Board {
         oldPosition[8] = 0;
         lastUpdate = 0;
     }
+
+    private void logBoard() {
+        Log.d("scd", "position: " + Utils.join(",", position));
+        Log.d("scd", "rotaion: " + Utils.join(",", rotation));
+        Log.d("scd", "oldPosition: " + Utils.join(",", oldPosition));
+        Log.d("scd", "lastUpdate: " + lastUpdate);
+        Log.d("scd", "initBearing: " + initBearing);
+    }
+
+    public static Board getInstance(double[] acceleration) {
+        if(instance==null) {
+            instance = new Board(acceleration);
+        }
+        return instance;
+    }
+
+    public static Board getInstance() {
+        return Board.getInstance(null);
+    }
+
     public float calibrate(float bearing) {
         if (bearing != 0.0)
             initBearing = bearing;
@@ -178,6 +203,7 @@ public class Board {
         updateVelocity(GPSVelocity, timems);
         updateDisplacement(GPSDisplacement, timems);
         lastUpdate = timems;
+        logBoard();
         return getPosition();
     }
     public double[] setOrientation(double[] orientation) {
