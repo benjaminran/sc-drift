@@ -6,28 +6,36 @@ public class Board {
     private long lastVelocityUpdate = 0;
 
     public double[] getDisplacement() {
-        return {position[0], position[1], position[2]};
+        double[] ret = {position[0], position[1], position[2]};
+        return ret;
     }
     public double[] getVelocity() {
-        return {position[3], position[4], position[5]};
+        double[] ret = {position[3], position[4], position[5]};
+        return ret;
     }
     public double[] getAcceleration() {
-        return {position[6], position[7], position[8]};
+        double[] ret = {position[6], position[7], position[8]};
+        return ret;
     }
     public double[] getPosition() {
-        return {position[0], position[1], position[2], position[3], position[4], position[5], position[6], position[7], position[8]};
+        double[] ret = {position[0], position[1], position[2], position[3], position[4], position[5], position[6], position[7], position[8]};
+        return ret;
     }
     public double[] getOrientation() {
-        return {rotation[0], rotation[1], rotation[2]};
+        double[] ret = {rotation[0], rotation[1], rotation[2]};
+        return ret;
     }
     public double[] getAngularVelocity() {
-        return {rotation[3], rotation[4], rotation[5]};
+        double[] ret = {rotation[3], rotation[4], rotation[5]};
+        return ret;
     }
     public double[] getAngularAcceleration() {
-        return {rotation[6], rotation[7], rotation[8]};
+        double[] ret = {rotation[6], rotation[7], rotation[8]};
+        return ret;
     }
     public double[] getRotation() {
-        return {rotation[0], rotation[1], rotation[2], rotation[3], rotation[4], rotation[5], rotation[6], rotation[7], rotation[8]};
+        double[] ret = {rotation[0], rotation[1], rotation[2], rotation[3], rotation[4], rotation[5], rotation[6], rotation[7], rotation[8]};
+        return ret;
     }
     public double[] setDisplacement(double[] displacement) {
         position[0] = displacement[0];
