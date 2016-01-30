@@ -6,6 +6,8 @@ public class Board {
     private double[] rotation = new double[9];
     private double[] oldPosition = new double[9];
     private long lastUpdate = 0;
+    private float initBearing = 0.0;
+    public static final double MINSLIDESTRENGTH = 0;
 
     public Board(double[] acceleration /* contains gravity */) {
         position[0] = 0;
@@ -36,6 +38,13 @@ public class Board {
         oldPosition[7] = 0;
         oldPosition[8] = 0;
         lastUpdate = 0;
+    }
+    public float calibrate(float bearing) {
+        if (bearing != 0.0)
+            initBearing = bearing;
+        else
+            return null;
+        return initBearing;
     }
 
     public double[] getDisplacement() {
@@ -68,6 +77,13 @@ public class Board {
     }
     public double[] getRotation() {
         double[] ret = {rotation[0], rotation[1], rotation[2], rotation[3], rotation[4], rotation[5], rotation[6], rotation[7], rotation[8]};
+        return ret;
+    }
+    public double[] getDirection() {
+        double[] ret = new double[3];
+        ret[0] = Math.cos(-rotation[1])*Math.cos(-rotation[2]) + (Math.sin(-rotation[1])*Math.cos(-rotation[2])*Math.sin(-rotation[0]) - Math.sin(-rotation[2])*Math.cos(-rotation[0])) + (Math.sin(-rotation[1])*Math.cos(-rotation[2])*Math.cos(-rotation[0]) + Math.sin(-rotation[2])*Math.sin(-rotation[0]));
+        ret[1] = Math.cos(-rotation[1])*Math.sin(-rotation[2]) + (Math.sin(-rotation[1])*Math.sin(-rotation[2])*Math.sin(-rotation[0]) + Math.cos(-rotation[2])*Math.cos(-rotation[0])) + (Math.sin(-rotation[1])*Math.sin(-rotation[2])*Math.cos(-rotation[0]) - Math.cos(-rotation[2])*Math.sin(-rotation[0]));
+        ret[2] = Math.cos(-rotation[1])*Math.sin(-rotation[0]) - Math.sin(-rotation[1]) + Math.cos(-rotation[1])*Math.cos(-rotation[0]);
         return ret;
     }
     public double[] setDisplacement(double[] displacement) {
@@ -142,6 +158,7 @@ public class Board {
         position[6] = Math.cos(-rotation[1])*Math.cos(-rotation[2])*acceleration[0] + (Math.sin(-rotation[1])*Math.cos(-rotation[2])*Math.sin(-rotation[0]) - Math.sin(-rotation[2])*Math.cos(-rotation[0]))*acceleration[1] + (Math.sin(-rotation[1])*Math.cos(-rotation[2])*Math.cos(-rotation[0]) + Math.sin(-rotation[2])*Math.sin(-rotation[0]))*acceleration[2];
         position[7] = Math.cos(-rotation[1])*Math.sin(-rotation[2])*acceleration[0] + (Math.sin(-rotation[1])*Math.sin(-rotation[2])*Math.sin(-rotation[0]) + Math.cos(-rotation[2])*Math.cos(-rotation[0]))*acceleration[1] + (Math.sin(-rotation[1])*Math.sin(-rotation[2])*Math.cos(-rotation[0]) - Math.cos(-rotation[2])*Math.sin(-rotation[0]))*acceleration[2];
         position[8] = Math.cos(-rotation[1])*Math.sin(-rotation[0])*acceleration[1] - Math.sin(-rotation[1])*acceleration[0] + Math.cos(-rotation[1])*Math.cos(-rotation[0])*acceleration[2];
+        return getAcceleration();
     }
     public double[] setPosition(double[] position) {
         this.position[0] = position[0];
@@ -190,5 +207,18 @@ public class Board {
         this.rotation[7] = rotation[7];
         this.rotation[8] = rotation[8];
         return getRotation();
+    }
+    public boolean isSliding() {
+        double speed = Math.sqrt(Math.pow(position[3],2)+Math.pow(position[4],2)+Math.pow(position[5],2));
+        double caaccel = speed * rotation[5];
+        double slideStrength = Math.abs(caaccel) - Math.abs(position[7]);
+        return (slideStrength > MINSLIDESTRENGTH);
+    }
+    public double[] computeVelocity(float speed, float bearing, double da, double dt) {
+        double[] ret = new double[3];
+        dir = Math.toRadians((bearing - initBearing) % 360);
+        ret[0] = speed * Math.cos(dir);
+        ret[1] = speed * Math.sin(dir);
+        ret[2] = da / dt;
     }
 }
