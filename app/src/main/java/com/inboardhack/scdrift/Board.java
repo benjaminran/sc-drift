@@ -289,7 +289,7 @@ public class Board implements Observer {
 
     @Override
     public void observeUpdate(Object origin) { // update board with new data
-        if(origin instanceof BluetoothBridge) {
+        /*if(origin instanceof BluetoothBridge) {
             if(dataService==null) {
                 Log.d("scd", "dataService was null");
                 return;
@@ -320,6 +320,6 @@ public class Board implements Observer {
                 lastSlide = null;
             }
         }
-        else if(origin instanceof VelocityMeter) {}
+        else if(origin instanceof VelocityMeter) {}*/
     }
 }
