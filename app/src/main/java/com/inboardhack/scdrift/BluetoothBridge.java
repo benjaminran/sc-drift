@@ -263,12 +263,12 @@ public class BluetoothBridge implements SensorEventListener, Runnable {
     }
 
     private void update() {
-
-
-/*
-        if(observers==null) return;
-        for(Observer o : observers)
-            o.observeUpdate(this);
-*/
+        String message = null;
+        try {
+            message = Utils.sanitizeInput(mmInputStream);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Log.d("scd", "MESSAGE:"+message);
     }
 }
