@@ -18,21 +18,22 @@ public class Utils {
         return ret;
     }
 
-    public static boolean checksum2(byte[] data) {
-        byte delimiter = '_';
-        int sum = 0;
-        int i=0;
-        for(; data[i] != delimiter; i++){
-            sum += data[i];
-        }
-        return false;
-    }
-
     public static boolean checksum(byte[] data) {
         byte curr = data[0];
         for(int i=1; i<data.length; i++) {
             curr = (byte) (curr ^ data[i]);
         }
         return curr==0;
+    }
+
+    public static byte[] checksumTransform(byte[] data) {
+        byte[] ret = new byte[data.length+1];
+        byte curr = data[0];
+        for(int i=1; i<data.length; i++) {
+            ret[i] = data[i];
+            curr = (byte) (curr ^ data[i]);
+        }
+        ret[ret.length-1] = curr;
+        return ret;
     }
 }

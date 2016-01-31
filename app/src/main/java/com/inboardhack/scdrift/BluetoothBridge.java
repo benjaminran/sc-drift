@@ -36,6 +36,8 @@ public class BluetoothBridge implements SensorEventListener, Runnable {
 
     private ArrayList<byte[]> data;
 
+    BluetoothController mBTController;
+
 //    private static final String BT_MAC_ADDRESS = "00:17:E9:76:EF:E6";
     private static final String BT_MAC_ADDRESS = "98:D3:31:FB:20:2B";
 
@@ -68,7 +70,10 @@ public class BluetoothBridge implements SensorEventListener, Runnable {
             public void run() {
                 while(true) {
                     if(data.size()>0) {
-                        Log.d("scd", new String(dequeueData())+"\n");
+                        byte[] bytes = dequeueData();
+                        if(!Utils.checksum(bytes))
+                            continue;
+                        else Log.d("scd", new String(bytes));
                     }
                     try {
                         Thread.sleep(50);
@@ -85,7 +90,7 @@ public class BluetoothBridge implements SensorEventListener, Runnable {
     }
 
     public void enqueueData(byte[] bytes) {
-        data.add(bytes);
+        data.add(Utils.checksumTransform(bytes));
     }
 
     public byte[] dequeueData() {
@@ -93,7 +98,7 @@ public class BluetoothBridge implements SensorEventListener, Runnable {
     }
 
     private void setUpBluetooth(final Context context) {
-        final BluetoothController mBTController = BluetoothController.getInstance().build(context);
+        mBTController = BluetoothController.getInstance().build(context);
         mBTController.setAppUuid(UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"));
         mBTController.setBluetoothListener(new BluetoothListener() {
 
@@ -152,6 +157,10 @@ public class BluetoothBridge implements SensorEventListener, Runnable {
         });
         //mBTController.startAsServer();
         mBTController.connect(BT_MAC_ADDRESS);
+    }
+
+    public boolean isConnected() {
+        return mBTController.getConnectionState()==State.STATE_CONNECTED;
     }
 
     private void processData(final BluetoothDevice device, final byte[] bytes) {

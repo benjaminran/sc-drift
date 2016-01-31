@@ -17,9 +17,8 @@ public class StartActivity extends AppCompatActivity implements View.OnClickList
     private int stage;
 
     private Board board;
-
-
-    private DataService dataService;
+    
+    public DataService dataService;
     private DataServiceConnection serviceConnection;
 
     private Button button;
