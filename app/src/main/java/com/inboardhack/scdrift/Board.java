@@ -167,17 +167,20 @@ public class Board implements Observer {
         lastUpdate = timems;
         return getVelocity();
     }
-    public double[] updateVelocity(double[] GPSVelocity, long timems) {
-        if ((oldPosition[3] == GPSVelocity[0] && oldPosition[4] == GPSVelocity[1] && oldPosition[5] == GPSVelocity[2]) && (timems - lastUpdate < 1000)) {
+    public double[] updateVelocity(double[] GPSVelocity, long timems, boolean useGPS) {
+        if (((oldPosition[3] == GPSVelocity[0] && oldPosition[4] == GPSVelocity[1] && oldPosition[5] == GPSVelocity[2]) && (timems - lastUpdate < 1000)) || !useGPS) {
             incrementVelocity(timems);
         } else {
             setVelocity(GPSVelocity);
+            oldPosition[3] = GPSVelocity[0];
+            oldPosition[4] = GPSVelocity[1];
+            oldPosition[5] = GPSVelocity[2];
             lastUpdate = timems;
         }
         return getVelocity();
     }
-    public double[] updateVelocity(double[] GPSVelocity, double[] acceleration, long timems) {
-        if (oldPosition[3] == GPSVelocity[0] && oldPosition[4] == GPSVelocity[1] && oldPosition[5] == GPSVelocity[2]) {
+    public double[] updateVelocity(double[] GPSVelocity, double[] acceleration, long timems, boolean useGPS) {
+        if (((oldPosition[3] == GPSVelocity[0] && oldPosition[4] == GPSVelocity[1] && oldPosition[5] == GPSVelocity[2]) && (timems - lastUpdate < 1000)) || !useGPS) {
             incrementVelocity(acceleration, timems);
         } else {
             setVelocity(GPSVelocity);
@@ -215,11 +218,11 @@ public class Board implements Observer {
         this.position[8] = position[8];
         return getPosition();
     }
-    public double[] updatePosition(double[] worldaccel, double[] realaccel, double[] GPSVelocity, double[] GPSDisplacement, long timems) {
+    public double[] updatePosition(double[] worldaccel, double[] realaccel, double[] GPSVelocity, double[] GPSDisplacement, long timems, boolean useGPS) {
         setAcceleration(worldaccel);
         setRealAcceleration(realaccel);
-        updateVelocity(GPSVelocity, timems);
-        updateDisplacement(GPSDisplacement, timems);
+        updateVelocity(GPSVelocity, timems, useGPS);
+        //updateDisplacement(GPSDisplacement, timems);
         lastUpdate = timems;
         logBoard();
         return getPosition();
