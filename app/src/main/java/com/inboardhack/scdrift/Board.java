@@ -291,7 +291,7 @@ public class Board implements Observer {
         if(origin instanceof BluetoothBridge) {
             if(dataService==null) {
                 Log.d("scd", "dataService was null");
-                return; // TODO
+                return;
             }
             long currentTime = System.currentTimeMillis();
             BluetoothBridge bridge = dataService.bridge;

@@ -1,6 +1,11 @@
 package com.inboardhack.scdrift;
 
+import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothClass;
+import android.bluetooth.BluetoothDevice;
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -8,13 +13,31 @@ import android.hardware.SensorManager;
 import android.location.Location;
 import android.os.Handler;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.util.Vector;
+
+import co.lujun.lmbluetoothsdk.BluetoothController;
+import co.lujun.lmbluetoothsdk.base.BluetoothListener;
+import co.lujun.lmbluetoothsdk.base.State;
 
 /**
  * Created by benjaminran on 1/30/16.
  */
 public class BluetoothBridge implements SensorEventListener, Runnable {
+
+
+
+    private List<String> mList;
+
+
+    private static final int ENABLE_BT = 3;
+
+    public static BluetoothClass.Device device = null;
+    private BluetoothAdapter mBluetoothAdapter;
 
     private ArrayList<Observer> observers;
 
@@ -39,7 +62,69 @@ public class BluetoothBridge implements SensorEventListener, Runnable {
         gravity = mSensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY);
         gravityData = new double[3];
 
+        setUpBluetooth(context);
+
         onResume();
+    }
+
+    private void setUpBluetooth(final Context context) {
+        BluetoothController mBTController = BluetoothController.getInstance().build(context);
+        mBTController.setAppUuid(UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"));
+        mBTController.setBluetoothListener(new BluetoothListener() {
+
+            @Override
+            public void onActionStateChanged(int preState, int state) {
+                Log.d("scd", "bluetooth service state:" + state);
+                if (state == State.STATE_CONNECTED) {
+                    //Intent intent = new Intent(ClassicBluetoothActivity.this, ChatActivity.class);
+                    //startActivityForResult(intent, 4);
+                }
+            }
+
+            @Override
+            public void onActionDiscoveryStateChanged(String discoveryState) {
+                // Callback when local Bluetooth adapter discovery process state changed.
+                if (discoveryState.equals(BluetoothAdapter.ACTION_DISCOVERY_STARTED)) {
+                    Toast.makeText(context, "scanning!", Toast.LENGTH_SHORT).show();
+                } else if (discoveryState.equals(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)) {
+                    Toast.makeText(context, "scan finished!", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onActionScanModeChanged(int preScanMode, int scanMode) {
+                // Callback when the current scan mode changed.
+                Log.d("scd", "preScanMode:" + preScanMode + ", scanMode:" + scanMode);
+            }
+
+            @Override
+            public void onBluetoothServiceStateChanged(int state) {
+                // Callback when the connection state changed.
+                Log.d("scd", "bluetooth service state:" + state);
+                if (state == State.STATE_CONNECTED) {
+                    //Intent intent = new Intent(context, ChatActivity.class);
+                    //startActivityForResult(intent, 4);
+                }
+            }
+
+            @Override
+            public void onActionDeviceFound(BluetoothDevice device) {
+                // Callback when found device.
+                mList.add(device.getName() + "@" + device.getAddress());
+
+            }
+
+            @Override
+            public void onReadData(final BluetoothDevice device, final byte[] data) {
+                // Callback when remote device send data to current device.
+                processData(device, data);
+            }
+        });
+        mBTController.startAsServer();
+    }
+
+    private void processData(final BluetoothDevice device, final byte[] data) {
+        Log.d("scd", data.toString());
     }
 
     public void registerObserver(Observer o) {
