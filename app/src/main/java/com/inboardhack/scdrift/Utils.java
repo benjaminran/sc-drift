@@ -48,13 +48,21 @@ public class Utils {
     }
 
     public static String sanitizeInput(InputStream is) {
-        if (is.read() == 0x7B)
+        int read = is.read();
+        if (read == 123)
             return (sanitizeInput_rec(is, new ArrayList<Byte>()));
-        else return (sanitizeInput(is));
+        else if (read < 0)
+            return null;
+        else
+            return (sanitizeInput(is));
     }
     private static String sanitizeInput_rec(InputStream is, ArrayList<Byte> in) {
-        byte ascii = is.read();
-        if (ascii == 0x7D) {
+        int read = is.read();
+        if (read < 0) {
+            return null;
+        }
+        byte ascii = (byte) read;
+        if (read == 125) {
             if (checksum(in)) {
                 byte[] inarr = new byte[in.size()];
                 for (int i = 0; i < in.size(); i++) {
