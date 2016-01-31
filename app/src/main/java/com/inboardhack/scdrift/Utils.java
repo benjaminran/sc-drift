@@ -5,6 +5,12 @@ import java.util.ArrayList;
 
 public class Utils {
 
+    public static ArrayList<Byte> convert(byte[] bytes) {
+        ArrayList<Byte> ret = new ArrayList<>(bytes.length);
+        for(byte b : bytes) ret.add(b);
+        return ret;
+    }
+
     public static String join(String sep, double[] values) {
         String ret = "";
         for(int i = 0; i<values.length; i++) {

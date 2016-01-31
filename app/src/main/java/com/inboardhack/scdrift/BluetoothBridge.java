@@ -68,7 +68,7 @@ public class BluetoothBridge implements SensorEventListener, Runnable {
                 while(true) {
                     if(data.size()>0) {
                         byte[] bytes = dequeueData();
-                        if(!Utils.checksum(bytes))
+                        if(!Utils.checksum(Utils.convert(bytes)))
                             continue;
                         else Log.d("scd", new String(bytes));
                     }
@@ -81,7 +81,7 @@ public class BluetoothBridge implements SensorEventListener, Runnable {
             }
         }).start();
 
-        setUpBluetooth(context);
+        setUpBluetooth();//context);
 
         onResume();
     }
@@ -258,13 +258,12 @@ public class BluetoothBridge implements SensorEventListener, Runnable {
 
     @Override
     public void run() {
-//        update();
-//        mHandler.postDelayed(this, UPDATE_PERIOD_MS);
+        update();
+        mHandler.postDelayed(this, UPDATE_PERIOD_MS);
     }
 
     private void update() {
-        Utils.sanitizeInput(mmInputStream);
-        ;
+
 
 /*
         if(observers==null) return;
