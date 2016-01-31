@@ -161,9 +161,9 @@ public class Board implements Observer {
         return incrementVelocity(getAcceleration(), timems);
     }
     private double[] incrementVelocity(double[] acceleration, long timems) {
-        position[3] += acceleration[0] * (timems - lastUpdate) / 1000;
-        position[4] += acceleration[1] * (timems - lastUpdate) / 1000;
-        position[5] += acceleration[2] * (timems - lastUpdate) / 1000;
+        position[3] += acceleration[0] * (timems - lastUpdate) / 1000.0;
+        position[4] += acceleration[1] * (timems - lastUpdate) / 1000.0;
+        position[5] += acceleration[2] * (timems - lastUpdate) / 1000.0;
         lastUpdate = timems;
         return getVelocity();
     }
