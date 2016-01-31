@@ -13,7 +13,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
     private DataServiceConnection serviceConnection;
     private DataService dataService;
 
-    private ScoreView scoreView;
+    private HighScoreView highScoreView;
     private DataUpdater dataUpdater;
 
     @Override
@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
     }
 
     private void initUi() {
-        scoreView = (ScoreView) findViewById(R.id.score_view);
+        highScoreView = (HighScoreView) findViewById(R.id.score_view);
     }
 
     @Override
@@ -69,6 +69,5 @@ public class MainActivity extends AppCompatActivity implements Observer {
     public void observeUpdate(Object origin) {
         dataService = serviceConnection.dataService;
         dataService.getVelocityMeter().registerForLocationIfNeeded(this);
-        dataService.getVelocityMeter().registerObserver(scoreView);
     }
 }

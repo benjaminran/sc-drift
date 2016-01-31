@@ -1,29 +1,24 @@
 package com.inboardhack.scdrift;
 
-import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothSocket;
 import android.content.Context;
-import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.location.Location;
-import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
 import android.widget.Toast;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
 import java.util.UUID;
-import java.util.Vector;
 
 import co.lujun.lmbluetoothsdk.BluetoothController;
 import co.lujun.lmbluetoothsdk.base.BluetoothListener;
@@ -34,20 +29,21 @@ import co.lujun.lmbluetoothsdk.base.State;
  */
 public class BluetoothBridge implements SensorEventListener, Runnable {
 
+    static final int UPDATE_PERIOD_MS = 10;
+    BluetoothAdapter mBluetoothAdapter;
+    BluetoothDevice mmDevice;
+    UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
+    OutputStream mmOutputStream;
+    InputStream mmInputStream;
+
     private ArrayList<byte[]> data;
-
     BluetoothController mBTController;
-
-//    private static final String BT_MAC_ADDRESS = "00:17:E9:76:EF:E6";
     private static final String BT_MAC_ADDRESS = "98:D3:31:FB:20:2B";
-
     private ArrayList<Observer> observers;
-
     private static BluetoothBridge instance = null;
     private Handler mHandler;
     private SensorManager mSensorManager;
     private Sensor accelerometer, gyroscope, gravity, orientation, linearAccelerometer;
-
     private double[] accelerometerData, rotationData, gravityData;
 
     private BluetoothBridge(Context context, Handler mHandler) {
@@ -97,7 +93,7 @@ public class BluetoothBridge implements SensorEventListener, Runnable {
         return data.remove(0);
     }
 
-    private void setUpBluetooth(final Context context) {
+    private void setUpBluetooth2(final Context context) {
         mBTController = BluetoothController.getInstance().build(context);
         mBTController.setAppUuid(UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"));
         mBTController.setBluetoothListener(new BluetoothListener() {
@@ -135,9 +131,9 @@ public class BluetoothBridge implements SensorEventListener, Runnable {
                     //Intent intent = new Intent(context, ChatActivity.class);
                     //startActivityForResult(intent, 4);
                     BluetoothDevice device = mBTController.getConnectedDevice();
-                    Log.i("scd", "Name: "+device.getName());
-                    Log.i("scd", "Address"+device.getAddress());
-                    Log.i("scd", "Contents: "+device.describeContents());
+                    Log.i("scd", "Name: " + device.getName());
+                    Log.i("scd", "Address" + device.getAddress());
+                    Log.i("scd", "Contents: " + device.describeContents());
 
                 }
             }
@@ -151,12 +147,33 @@ public class BluetoothBridge implements SensorEventListener, Runnable {
             @Override
             public void onReadData(final BluetoothDevice device, final byte[] data) {
                 // Callback when remote device send data to current device.
-                //processData(device, data);
+                processData(device, data);
                 enqueueData(data);
             }
         });
         //mBTController.startAsServer();
         mBTController.connect(BT_MAC_ADDRESS);
+    }
+
+    private void setUpBluetooth(){
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
+        if(pairedDevices.size() > 0) {
+            for(BluetoothDevice device : pairedDevices)
+            {
+                Log.i("scd", device.toString());
+            }
+        }
+        mmDevice = mBluetoothAdapter.getRemoteDevice(BT_MAC_ADDRESS);
+        BluetoothSocket mmSocket = null;
+        try {
+            mmSocket = mmDevice.createRfcommSocketToServiceRecord(uuid);
+            mmSocket.connect();
+            mmOutputStream = mmSocket.getOutputStream();
+            mmInputStream = mmSocket.getInputStream();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public boolean isConnected() {
@@ -165,15 +182,7 @@ public class BluetoothBridge implements SensorEventListener, Runnable {
 
     private void processData(final BluetoothDevice device, final byte[] bytes) {
         String data = new String(bytes);
-        Log.i("scd", data);
-        /*try {
-            f.write(bytes, 0, bytes.length);//new String(bytes, "UTF-8")+"\n");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }*/
-//        update();
-//        Log.wtf("scd", data);
-
+        Log.i("scd", "DATA:"+data);
     }
 
     public void registerObserver(Observer o) {
@@ -243,13 +252,18 @@ public class BluetoothBridge implements SensorEventListener, Runnable {
 
     @Override
     public void run() {
-//        update();
-//        mHandler.post(this);//, UPDATE_PERIOD_MS);
+        update();
+        mHandler.postDelayed(this, UPDATE_PERIOD_MS);
     }
 
     private void update() {
+        Utils.sanitizeInput(mmInputStream);
+        ;
+
+/*
         if(observers==null) return;
         for(Observer o : observers)
             o.observeUpdate(this);
+*/
     }
 }

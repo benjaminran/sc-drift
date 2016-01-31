@@ -1,5 +1,7 @@
 package com.inboardhack.scdrift;
 
+import java.io.InputStream;
+
 public class Utils {
 
     public static String join(String sep, double[] values) {
@@ -19,6 +21,7 @@ public class Utils {
     }
 
     public static boolean checksum(byte[] data) {
+        if(data==null) return false;
         byte curr = data[0];
         for(int i=1; i<data.length; i++) {
             curr = (byte) (curr ^ data[i]);
@@ -35,5 +38,9 @@ public class Utils {
         }
         ret[ret.length-1] = curr;
         return ret;
+    }
+
+    public static String sanitizeInput(InputStream is){
+        return null;
     }
 }

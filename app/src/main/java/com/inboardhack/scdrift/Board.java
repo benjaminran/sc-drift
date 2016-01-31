@@ -69,12 +69,18 @@ public class Board implements Observer {
         if(instance==null) {
             instance = new Board(dataService);
         }
+        for(int i=0; i<6; i++) // dummy slide data; TODO: remove
+            SlideHistory.getInstance().add(new Slide(5, System.currentTimeMillis(), Board.getInstance()));
+        SlideHistory.getInstance().get(1).incrementScore(new double[]{0,-10,0}, new double[]{1,0,0}, new double[]{0,3,0});
+        SlideHistory.getInstance().get(2).incrementScore(new double[]{0,-6.78,0}, new double[]{1,0,0}, new double[]{0,2.3,0});
+        SlideHistory.getInstance().get(3).incrementScore(new double[]{0,-10,0}, new double[]{1,0,0}, new double[]{0,6,0});
+        SlideHistory.getInstance().get(0).incrementScore(new double[]{0,-12,0}, new double[]{1,0,0}, new double[]{0,6,0});
         return instance;
     }
 
     /* must not be called before getInstance(DataService) has been called */
     public static Board getInstance() {
-        return Board.getInstance(null);
+        return instance;
     }
 
     public float calibrate(float bearing) {
