@@ -101,7 +101,7 @@ public class VelocityMeter implements LocationListener, android.location.Locatio
 
     public boolean locationHasAll() {
         if(currentLocation==null) {
-            Log.d("scd", "currentLocation is null");
+            Log.w("scd", "currentLocation is null");
             return false;
         }
         return currentLocation.hasAltitude() && currentLocation.hasSpeed() && currentLocation.hasBearing();
@@ -112,7 +112,7 @@ public class VelocityMeter implements LocationListener, android.location.Locatio
         previousLocation = currentLocation;
         currentLocation = location;
         // update with new location
-        Log.w("scd", "hasSpeed: "+location.hasSpeed()+"; hasBearing: "+location.hasBearing()+"; hasAltitude: "+location.hasAltitude());
+//        Log.w("scd", "hasSpeed: "+location.hasSpeed()+"; hasBearing: "+location.hasBearing()+"; hasAltitude: "+location.hasAltitude());
         if(location.hasSpeed()) speed = location.getSpeed();
         if(location.hasBearing()) bearing = location.getBearing();
         if(location.hasAltitude()) {
@@ -123,7 +123,7 @@ public class VelocityMeter implements LocationListener, android.location.Locatio
             da = currentAltitude = previousAltitude;
             dt = (currentTime - previousTime)/1000.0;
         }
-        Log.d("scd", "dt = "+dt);
+//        Log.d("scd", "dt = "+dt);
         for(final Observer observer : observers) {
             dataService.getUiHandler().post(new Runnable() {
                 @Override

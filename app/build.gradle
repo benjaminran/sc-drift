@@ -22,7 +22,7 @@ android {
 repositories {
     maven {
         url "http://arissa34.free.fr/maven2/"
-        artifactUrls mavenLocal()
+//        http://arissa34.free.fr/maven2/
     }
     mavenCentral()
 }

@@ -61,7 +61,6 @@ public class BluetoothBridge implements SensorEventListener, Runnable {
     @Override
     public void onSensorChanged(SensorEvent event) {
         if(event.sensor==accelerometer) {
-            Log.d("scd", "accelerometer: "+Utils.join(",", event.values));
             accelerometerData[0] = event.values[0];
             accelerometerData[1] = event.values[1] * -1;
             accelerometerData[2] = event.values[2];
@@ -81,15 +80,14 @@ public class BluetoothBridge implements SensorEventListener, Runnable {
             rotationData[1] = event.values[1]*-1;
             rotationData[2] = event.values[2];
         }
-        else if(event.sensor==linearAccelerometer) {
-            Log.d("scd", "linearAccelerometer: "+Utils.join(",", event.values));
+        /*else if(event.sensor==accelerometer) {
             linearAccelerometerData[0] = event.values[0];
             linearAccelerometerData[1] = event.values[1] * -1;
             linearAccelerometerData[2] = event.values[2];
-        }
+        }*/
     }
 
-    public double[] getRealAccel() { return linearAccelerometerData; }
+    public double[] getRealAccel() { return accelerometerData; }
     public double[] getWorldAccel() { return accelerometerData; }
     public double[] getGravity() { return gravityData; }
     public double[] getRotationData() { return rotationData; }

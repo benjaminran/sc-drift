@@ -226,7 +226,6 @@ public class Board implements Observer {
         updateVelocity(GPSVelocity, timems, useGPS);
         //updateDisplacement(GPSDisplacement, timems);
         lastUpdate = timems;
-        logBoard();
         return getPosition();
     }
     public double[] setOrientation(double[] orientation) {
@@ -269,7 +268,7 @@ public class Board implements Observer {
     }
     public boolean isSliding(double speed) {
         double caaccel = speed * rotation[5];
-        double slideStrength = Math.abs(caaccel) - Math.abs(realAccel[1]);
+        double slideStrength = Math.abs(Math.abs(caaccel) - Math.abs(realAccel[1]));
         return (slideStrength > MINSLIDESTRENGTH);
     }
     public Slide getLastSlide() {
@@ -295,11 +294,11 @@ public class Board implements Observer {
             BluetoothBridge bridge = dataService.bridge;
             // check dt
             if(currentTime-lastUpdate==0) return;
-            Log.d("scd", String.format("%f; %f; %f; %f", dataService.getVelocityMeter().speed, dataService.getVelocityMeter().bearing, dataService.getVelocityMeter().da, dataService.getVelocityMeter().dt));
-            logBoard();
             // update position
+            Log.d("scd", "position: "+Utils.join(",", position));
+            Log.d("scd", "realAccel: "+Utils.join(",", realAccel));
             double[] velocity = computeVelocity(dataService.getVelocityMeter().speed, dataService.getVelocityMeter().bearing, dataService.getVelocityMeter().da, dataService.getVelocityMeter().dt);
-            updatePosition(bridge.getWorldAccel(), bridge.getRealAccel(), velocity, new double[]{0, 0, 0}, currentTime, dataService.getVelocityMeter().locationHasAll());
+            updatePosition(new double[]{0,0,0}, bridge.getRealAccel(), velocity, new double[]{0, 0, 0}, currentTime, dataService.getVelocityMeter().locationHasAll());//bridge.getWorldAccel()
             setRotation(bridge.getRotationData());
             Slide slide = newSlide(currentTime);
             if(slide==null && getLastSlide()!=null){ // just started sliding
