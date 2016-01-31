@@ -268,8 +268,11 @@ public class Board implements Observer {
         return null;
     }
     public boolean isSliding(double speed) {
-        double caaccel = speed * rotation[5];
-        double slideStrength = Math.abs(caaccel) - Math.abs(realAccel[1]);
+      //  double caaccel = speed * rotation[5];
+      //  double slideStrength = Math.abs(caaccel) - Math.abs(realAccel[1]);
+        double[] velocity = getVelocity();
+        double[] direction = getDirection();
+        double slideStrength = (Math.sqrt(Math.pow(velocity[1]*direction[2] - velocity[2]*direction[1], 2) + Math.pow(velocity[2]*direction[0] - velocity[0]*direction[2], 2) + Math.pow(velocity[0]*direction[1] - velocity[1]*direction[0], 2)));
         return (slideStrength > MINSLIDESTRENGTH);
     }
     public Slide getLastSlide() {
