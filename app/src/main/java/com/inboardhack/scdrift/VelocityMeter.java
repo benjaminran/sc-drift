@@ -6,7 +6,6 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -33,15 +32,16 @@ public class VelocityMeter implements LocationListener, android.location.Locatio
     public double da;
     public double dt;
 
-    public Location location;
+    public Location currentLocation;
+    public Location previousLocation;
 
-    private double lastAltitude;
-    private double lastTime;
+    private double currentAltitude;
+    private double currentTime;
+    private double previousAltitude;
+    private double previousTime;
 
     public VelocityMeter(DataService dataService) {
         observers = new ArrayList<Observer>();
-        lastAltitude = 0;
-        lastTime = System.currentTimeMillis();
         this.dataService = dataService;
         registeredForLocation = false;
     }
@@ -71,7 +71,7 @@ public class VelocityMeter implements LocationListener, android.location.Locatio
         LocationManager locationManager = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
         android.location.LocationListener locationListener = dataService.getVelocityMeter();
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener, dataService.getDataThreadLooper());
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener, dataService.getDataThreadLooper());
+//        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener, dataService.getDataThreadLooper());
     }
 
     @Override
@@ -101,16 +101,21 @@ public class VelocityMeter implements LocationListener, android.location.Locatio
 
     @Override
     public void onLocationChanged(Location location) {
-        this.location = location;
+        previousLocation = currentLocation;
+        currentLocation = location;
         // update with new location
-        if(!location.hasSpeed() || !location.hasBearing() || !location.hasAltitude())
-            Log.w("scd", "hasSpeed: "+location.hasSpeed()+"; hasBearing: "+location.hasBearing()+"; hasAltitude: "+location.hasAltitude());
-        final double speed = location.getSpeed();
-        final double bearing = location.getBearing();
-        final double altitude = location.getAltitude();
-        long time = location.getTime();
-        Log.d("scd", "dt = "+(time-lastTime));
-        Log.d("scd", "current thread: "+Thread.currentThread());
+        Log.w("scd", "hasSpeed: "+location.hasSpeed()+"; hasBearing: "+location.hasBearing()+"; hasAltitude: "+location.hasAltitude());
+        if(location.hasSpeed()) speed = location.getSpeed();
+        if(location.hasBearing()) bearing = location.getBearing();
+        if(location.hasAltitude()) {
+            previousAltitude = currentAltitude;
+            previousTime = currentTime;
+            currentAltitude = location.getAltitude();
+            currentTime = location.getTime();
+            da = currentAltitude = previousAltitude;
+            dt = (currentTime - previousTime)/1000.0;
+        }
+        Log.d("scd", "dt = "+dt);
         for(final Observer observer : observers) {
             dataService.getUiHandler().post(new Runnable() {
                 @Override
@@ -119,9 +124,6 @@ public class VelocityMeter implements LocationListener, android.location.Locatio
                 }
             });
         }
-
-        lastAltitude = altitude;
-        lastTime = time;
     }
 
     @Override

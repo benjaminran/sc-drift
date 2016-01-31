@@ -44,11 +44,6 @@ public class ScoreView extends RelativeLayout implements Observer {
 //        addView(scoreLabel);
     }
 
-    public void updateSpeed(double speed, double bearing, double altitude) {
-        scoreView.setText(String.format("%.5f - %.2f - %.2f", speed, bearing, altitude));
-        scoreLabel.setText(String.format("%.5f - %.2f - %.2f", speed, bearing, altitude));
-    }
-
     public void update() {
         double[] acceleration = null;
         double[] velocity = null;
@@ -75,6 +70,8 @@ public class ScoreView extends RelativeLayout implements Observer {
         double speed = 0;
         double bearing = 0;
         double altitude = 0;
-        updateSpeed(speed, bearing, altitude);
+        Board board = Board.getInstance();
+        double[] v = board.getVelocity();
+        scoreView.setText(String.format("(%f, %f, %f)", v[0], v[1], v[2]));
     }
 }

@@ -280,9 +280,11 @@ public class Board implements Observer {
     }
 
     @Override
-    public void observeUpdate(Object origin) {
+    public void observeUpdate(Object origin) { // update board with new data
         if(origin instanceof BluetoothBridge) {
             if(dataService==null) return; // TODO
+            Log.d("scd", String.format("%f; %f; %f; %f", dataService.getVelocityMeter().speed, dataService.getVelocityMeter().bearing, dataService.getVelocityMeter().da, dataService.getVelocityMeter().dt));
+            logBoard();
             long currentTime = System.currentTimeMillis();
             BluetoothBridge bridge = dataService.bridge;
             // check dt
@@ -290,8 +292,8 @@ public class Board implements Observer {
             else lastUpdate = currentTime;
             // update position
             double[] velocity = computeVelocity(dataService.getVelocityMeter().speed, dataService.getVelocityMeter().bearing, dataService.getVelocityMeter().da, dataService.getVelocityMeter().dt);
-            updatePosition(bridge.getWorldAccel(), bridge.getRealAccel(), velocity, new double[]{0, 0, 0}, currentTime); // TODO: time of bridge or location reading? TODO: world accel, real accel
-            setRotation(bridge.getOrientationData());
+            updatePosition(bridge.getWorldAccel(), bridge.getRealAccel(), velocity, new double[]{0, 0, 0}, currentTime);
+            setRotation(bridge.getRotationData());
             Slide slide = newSlide(currentTime);
             if(slide==null && getLastSlide()!=null){ // just started sliding
                 getLastSlide().incrementScore(velocity, getDirection(), bridge.getRealAccel());
