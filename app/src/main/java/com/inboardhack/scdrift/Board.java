@@ -170,6 +170,7 @@ public class Board implements Observer {
         if (Math.abs(rotation[5]) > MAX_ANGULAR_ACCELERATION && !isSliding(speed)) {
             mult = speed / Math.sqrt(Math.pow(position[3],2)+Math.pow(position[4],2)+Math.pow(position[5],2));
         } else {
+            return getVelocity();
             mult = speed;
             setVelocity(getDirection());
         }
