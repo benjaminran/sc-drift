@@ -129,9 +129,9 @@ public class Board implements Observer {
     }
     public double[] getDirection() {
         double[] ret = new double[3];
-        ret[0] = Math.cos(-rotation[1])*Math.cos(-rotation[2]);
-        ret[1] = Math.cos(-rotation[1])*Math.sin(-rotation[2]);
-        ret[2] = -Math.sin(-rotation[1]);
+        ret[0] = Math.cos(rotation[1])*Math.cos(rotation[2]);
+        ret[1] = Math.cos(rotation[1])*Math.sin(rotation[2]);
+        ret[2] = Math.sin(rotation[1]);
         return ret;
     }
     public double[] setDisplacement(double[] displacement) {
