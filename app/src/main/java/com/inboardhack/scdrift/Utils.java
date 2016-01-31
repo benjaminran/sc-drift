@@ -1,5 +1,6 @@
 package com.inboardhack.scdrift;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
@@ -47,23 +48,24 @@ public class Utils {
         return ret;
     }
 
-    public static String sanitizeInput(InputStream is) {
+    public static String sanitizeInput(InputStream is) throws IOException {
         int read = is.read();
         if (read == 123)
+
             return (sanitizeInput_rec(is, new ArrayList<Byte>()));
         else if (read < 0)
             return null;
         else
             return (sanitizeInput(is));
     }
-    private static String sanitizeInput_rec(InputStream is, ArrayList<Byte> in) {
+    private static String sanitizeInput_rec(InputStream is, ArrayList<Byte> in) throws IOException {
         int read = is.read();
         if (read < 0) {
             return null;
         }
         byte ascii = (byte) read;
         if (read == 125) {
-            if (checksum(in)) {
+            if (true){//checksum(in)) {
                 byte[] inarr = new byte[in.size()];
                 for (int i = 0; i < in.size(); i++) {
                     inarr[i] = in.get(i).byteValue();
