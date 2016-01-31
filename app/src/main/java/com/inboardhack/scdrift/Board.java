@@ -15,7 +15,8 @@ public class Board implements Observer {
     private long lastUpdate = 0;
     private Slide lastSlide;
     private float initBearing = 0.0f;
-    public static final double MINSLIDESTRENGTH = 0;
+    public static final double MINSLIDESTRENGTH = 0.0;
+    public static final double MAX_ANGULAR_ACCELERATION = 0.2;
 
     /* must be called at a point when gravity vector is available */
     private Board(DataService dataService) {
@@ -158,6 +159,19 @@ public class Board implements Observer {
         position[5] = velocity[2];
         return getVelocity();
     }
+    private double[] normalizeVelocity(double speed) {
+        double mult;
+        if (Math.abs(rotation[5]) > MAX_ANGULAR_ACCELERATION) {
+            mult = speed / Math.sqrt(Math.pow(position[3],2)+Math.pow(position[4],2)+Math.pow(position[5],2));
+        } else {
+            mult = speed;
+            setVelocity(getDirection());
+        }
+        position[3] *= mult;
+        position[4] *= mult;
+        position[5] *= mult;
+        return getVelocity();
+    }
     private double[] incrementVelocity(long timems) {
         return incrementVelocity(getAcceleration(), timems);
     }
@@ -169,28 +183,16 @@ public class Board implements Observer {
         lastUpdate = timems;
         return getVelocity();
     }
-    public double[] updateVelocity(double[] GPSVelocity, long timems, boolean useGPS) {
-        if (((oldPosition[3] == GPSVelocity[0] && oldPosition[4] == GPSVelocity[1] && oldPosition[5] == GPSVelocity[2]) && (timems - lastUpdate < 1000)) || !useGPS) {
-            incrementVelocity(timems);
-        } else {
-            setVelocity(GPSVelocity);
-            oldPosition[3] = GPSVelocity[0];
-            oldPosition[4] = GPSVelocity[1];
-            oldPosition[5] = GPSVelocity[2];
-            lastUpdate = timems;
-        }
+    public double[] updateVelocity(double speed, long timems) {
+        incrementVelocity(timems);
+        normalizeVelocity(speed);
+        lastUpdate = timems;
         return getVelocity();
     }
-    public double[] updateVelocity(double[] GPSVelocity, double[] acceleration, long timems, boolean useGPS) {
-        if (((oldPosition[3] == GPSVelocity[0] && oldPosition[4] == GPSVelocity[1] && oldPosition[5] == GPSVelocity[2]) && (timems - lastUpdate < 1000)) || !useGPS) {
-            incrementVelocity(acceleration, timems);
-        } else {
-            setVelocity(GPSVelocity);
-            oldPosition[3] = GPSVelocity[0];
-            oldPosition[4] = GPSVelocity[1];
-            oldPosition[5] = GPSVelocity[2];
-            lastUpdate = timems;
-        }
+    public double[] updateVelocity(double speed, double[] acceleration, long timems) {
+        incrementVelocity(acceleration, timems);
+        normalizeVelocity(speed);
+        lastUpdate = timems;
         return getVelocity();
     }
     public double[] setAcceleration(double[] acceleration) {
@@ -220,11 +222,10 @@ public class Board implements Observer {
         this.position[8] = position[8];
         return getPosition();
     }
-    public double[] updatePosition(double[] worldaccel, double[] realaccel, double[] GPSVelocity, double[] GPSDisplacement, long timems, boolean useGPS) {
+    public double[] updatePosition(double[] worldaccel, double[] realaccel, double speed, long timems) {
         setAcceleration(worldaccel);
         setRealAcceleration(realaccel);
-        updateVelocity(GPSVelocity, timems, useGPS);
-        //updateDisplacement(GPSDisplacement, timems);
+        updateVelocity(speed, timems);
         lastUpdate = timems;
         return getPosition();
     }
