@@ -40,7 +40,26 @@ public class Utils {
         return ret;
     }
 
-    public static String sanitizeInput(InputStream is){
-        return null;
+    public static String sanitizeInput(InputStream is) {
+        if (is.read() == 0x7B)
+            return (sanitizeInput_rec(is, new ArrayList<Byte>()));
+        else return (sanitizeInput(is));
+    }
+    private static String sanitizeInput_rec(InputStream is, ArrayList<Byte> in) {
+        byte ascii = is.read();
+        if (ascii == 0x7D) {
+            if (checksum(in)) {
+                byte[] inarr = new byte[in.size()];
+                for (int i = 0; i < in.size(); i++) {
+                    inarr[i] = in.get(i).byteValue();
+                }
+                return new String(inarr, "UTF-8");
+            } else {
+                return null;
+            }
+        } else {
+            in.add(ascii);
+            return sanitizeInput_rec(is, in);
+        }
     }
 }
