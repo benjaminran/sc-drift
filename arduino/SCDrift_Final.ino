@@ -57,13 +57,13 @@ MPU6050 mpu;
 // not compensated for orientation, so +X is always +X according to the
 // sensor, just without the effects of gravity. If you want acceleration
 // compensated for orientation, us OUTPUT_READABLE_WORLDACCEL instead.
-#define OUTPUT_READABLE_REALACCEL
+//#define OUTPUT_READABLE_REALACCEL
 
 // uncomment "OUTPUT_READABLE_WORLDACCEL" if you want to see acceleration
 // components with gravity removed and adjusted for the world frame of
 // reference (yaw is relative to initial orientation, since no magnetometer
 // is present in this case). Could be quite handy in some cases.
-#define OUTPUT_READABLE_WORLDACCEL
+//#define OUTPUT_READABLE_WORLDACCEL
 
 // uncomment "OUTPUT_TEAPOT" if you want output that matches the
 // format used for the InvenSense teapot demo
@@ -349,18 +349,19 @@ void loop()
              if(count==6){
               newrot[2]=fabs((fabs(ypr[2])-fabs(lastrot[2]))/.51);
               newrot[1]=fabs((fabs(ypr[1])-fabs(lastrot[1]))/.51);
-              newrot[0]=fabs(fabs((ypr[0])-fabs(lastrot[0]))/.51);
+              newrot[0]=fabs((fabs(ypr[0])-fabs(lastrot[0]))/.51);
               lastrot[2]=ypr[2];
               lastrot[1]=ypr[1];
               lastrot[0]=ypr[0];
               
-              Serial.print("{newrot\t");
+              Serial.print("{gyr:");
               Serial.print(newrot[2]);
               Serial.print(",");
               Serial.print(newrot[1] );
               Serial.print(",");
               Serial.println(newrot[0]);
-              BTserial.print("{newrot:");
+              Serial.print("}/n");
+              BTserial.print("{gyr:");
               BTserial.print(newrot[2] );
               BTserial.print(",");
               BTserial.print(newrot[1] );
@@ -413,7 +414,7 @@ void loop()
               digitalWrite(trigpin,LOW);
               int distance = pulseIn(echopin,HIGH);
               distance = distance/58.0;
-              int velocity = ((distance*distance)-(49)); //since we are using m/s as the unit of the velocity, 0.01* 1000 = 1
+              int velocity = (((distance*distance)-36)/4); //since we are using m/s as the unit of the velocity, 0.01* 1000 = 1
               Serial.print("{");
               Serial.print("vel:");
               Serial.print(velocity);  
@@ -482,7 +483,7 @@ void loop()
         // blink LED to indicate activity
         blinkState = !blinkState;
         digitalWrite(LED_PIN, blinkState);
-        //delay(5);
+        //delay(1);
     }
 
 
