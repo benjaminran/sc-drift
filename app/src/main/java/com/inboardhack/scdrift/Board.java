@@ -275,6 +275,7 @@ public class Board implements Observer {
         return null;
     }
     public boolean isSliding(double speed) {
+        return (rotation[5] > MAX_ANGULAR_ACCELERATION + MINSLIDESTRENGTH)
       //  double caaccel = speed * rotation[5];
       //  double slideStrength = Math.abs(caaccel) - Math.abs(realAccel[1]);
         double[] velocity = getVelocity();
