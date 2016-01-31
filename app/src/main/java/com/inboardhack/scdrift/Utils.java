@@ -1,6 +1,7 @@
 package com.inboardhack.scdrift;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 
 public class Utils {
 
@@ -20,11 +21,11 @@ public class Utils {
         return ret;
     }
 
-    public static boolean checksum(byte[] data) {
-        if(data==null) return false;
-        byte curr = data[0];
-        for(int i=1; i<data.length; i++) {
-            curr = (byte) (curr ^ data[i]);
+    public static boolean checksum(ArrayList<Byte> data) {
+        if(data==null || data.size()==0) return false;
+        byte curr = data.get(0);
+        for(int i=1; i<data.size(); i++) {
+            curr = (byte) (curr ^ data.get(i));
         }
         return curr==0;
     }
