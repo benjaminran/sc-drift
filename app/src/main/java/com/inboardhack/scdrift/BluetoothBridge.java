@@ -16,6 +16,7 @@ import android.widget.Toast;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.UUID;
@@ -181,7 +182,12 @@ public class BluetoothBridge implements SensorEventListener, Runnable {
     }
 
     private void processData(final BluetoothDevice device, final byte[] bytes) {
-        String data = new String(bytes);
+        String data = null;
+        try {
+            data = new String(bytes, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
         Log.i("scd", "DATA:"+data);
     }
 
@@ -252,8 +258,8 @@ public class BluetoothBridge implements SensorEventListener, Runnable {
 
     @Override
     public void run() {
-        update();
-        mHandler.postDelayed(this, UPDATE_PERIOD_MS);
+//        update();
+//        mHandler.postDelayed(this, UPDATE_PERIOD_MS);
     }
 
     private void update() {
