@@ -14,15 +14,9 @@ import android.widget.Toast;
 
 public class StartActivity extends AppCompatActivity implements View.OnClickListener, Observer {
 
-    private int stage;
-
-    private Board board;
-    
     public DataService dataService;
     private DataServiceConnection serviceConnection;
-
     private Button button;
-    private TextView directions;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,10 +25,7 @@ public class StartActivity extends AppCompatActivity implements View.OnClickList
         Toolbar toolbar = (Toolbar) findViewById(R.id.start_toolbar);
         setSupportActionBar(toolbar);
 
-        stage = 1;
-
         button = (Button) findViewById(R.id.start_button);
-        directions = (TextView) findViewById(R.id.start_directions);
         button.setOnClickListener(this);
 
         serviceConnection = new DataServiceConnection(new Handler(getMainLooper()));
@@ -42,19 +33,6 @@ public class StartActivity extends AppCompatActivity implements View.OnClickList
         Intent intent = new Intent(this, DataService.class);
         startService(intent);
         bindService(intent, serviceConnection, 0);
-
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if(dataService!=null) dataService.onResume();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if(dataService!=null) dataService.onPause();
     }
 
     @Override
@@ -83,16 +61,9 @@ public class StartActivity extends AppCompatActivity implements View.OnClickList
         if(dataService==null) {
             Toast.makeText(this, "Please wait, data service still initializing", Toast.LENGTH_LONG).show();
         }
-        if(stage==1) { // starting calibration
-            if(notMoving() && dataService!=null) {
-                board = Board.getInstance(dataService);
-                button.setText("Finish");
-                directions.setText("Ride your board straight forward then click the button again and you're done.");
-                stage++;
-            }
-        }
-        else if(stage==2) { // finish calibration
-            board.calibrate(dataService.getVelocityMeter().bearing);
+
+        if(notMoving()) {
+            Board.getInstance(dataService);
             Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
             finish();
@@ -102,8 +73,6 @@ public class StartActivity extends AppCompatActivity implements View.OnClickList
     @Override
     public void observeUpdate(Object origin) { // onServiceBound
         dataService = serviceConnection.dataService;
-        dataService.bridge = BluetoothBridge.getInstance(this, dataService.dataThread.mHandler);
-        dataService.bridge.run();
-        dataService.getVelocityMeter().registerForLocationIfNeeded(this);
+        BluetoothBridge.getInstance(this, dataService.dataThread.mHandler).run();
     }
 }

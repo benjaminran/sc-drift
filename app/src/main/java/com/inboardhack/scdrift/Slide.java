@@ -4,11 +4,11 @@ public class Slide {
 
     private int score;
     private double initSpeed;
-    private long startTime;
+    private long startTime, endTime;
     private boolean complete;
     private Board board;
-    private static final double ANGLEGAIN = 1;
-    private static final double ACCELERATIONGAIN = 1;
+    private static final double ANGLEGAIN = 1; // TODO: determine experimenting
+    private static final double ACCELERATIONGAIN = 1; // TODO: determine experimenting
 
     public Slide (double speed, long timems, Board board) {
         score = 0;
@@ -34,4 +34,10 @@ public class Slide {
     public void forceComplete() {
         complete = true;
     }
+
+    public void setEndTime(long t) { endTime = t; }
+    public long getEndTime() { return endTime; }
+    public long getStartTime() { return startTime; }
+
+    public double getDuration() { return (endTime - startTime) / 1000.0; }
 }

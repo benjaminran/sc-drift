@@ -8,6 +8,6 @@ import junit.framework.TestCase;
 public class UtilsTest extends TestCase {
 
     public void testChecksum() throws Exception {
-        checksum(new byte[]{111,120,55,127,'_',157});//413
+
     }
 }

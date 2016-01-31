@@ -26,7 +26,7 @@ public class FindBoard extends AsyncTask<String, Void, Boolean> {
         tryAgain = false;
         context = activity;
         this.activity = activity;
-        bridge = activity.dataService.bridge;
+        bridge = BluetoothBridge.getInstance();
         dialog = new ProgressDialog(context);
     }
 

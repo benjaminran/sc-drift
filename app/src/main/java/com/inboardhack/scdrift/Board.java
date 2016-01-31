@@ -1,9 +1,9 @@
 package com.inboardhack.scdrift;
 
-import android.text.TextUtils;
 import android.util.Log;
 
-public class Board implements Observer {
+/* TODO: Constants: MINSLIDESTRENGTH, MAXANGULARACCELERATION */
+public class Board {
 
     public static Board instance = null;
     private DataService dataService;
@@ -21,8 +21,7 @@ public class Board implements Observer {
     /* must be called at a point when gravity vector is available */
     private Board(DataService dataService) {
         this.dataService = dataService;
-        dataService.bridge.registerObserver(this);
-        double[] acceleration = dataService.bridge.getGravity(); // initialize with gravity vector
+        double[] acceleration = BluetoothBridge.getInstance().getGravity(); // initialize with gravity vector
         position[0] = 0;
         position[1] = 0;
         position[2] = 0;
@@ -291,41 +290,5 @@ public class Board implements Observer {
         ret[1] = speed * Math.sin(dir);
         ret[2] = da / dt;
         return ret;
-    }
-
-    @Override
-    public void observeUpdate(Object origin) { // update board with new data
-        /*if(origin instanceof BluetoothBridge) {
-            if(dataService==null) {
-                Log.d("scd", "dataService was null");
-                return;
-            }
-            long currentTime = System.currentTimeMillis();
-            BluetoothBridge bridge = dataService.bridge;
-            // check dt
-            if(currentTime-lastUpdate==0) return;
-            // update position
-            Log.d("scd", "position: "+Utils.join(",", position));
-            Log.d("scd", "realAccel: "+Utils.join(",", realAccel));
-            double[] velocity = computeVelocity(dataService.getVelocityMeter().speed, dataService.getVelocityMeter().bearing, dataService.getVelocityMeter().da, dataService.getVelocityMeter().dt);
-            updatePosition(new double[]{0,0,0}, bridge.getRealAccel(), velocity, new double[]{0, 0, 0}, currentTime, dataService.getVelocityMeter().locationHasAll());//bridge.getWorldAccel()
-            setRotation(bridge.getRotationData());
-            Slide slide = newSlide(currentTime);
-            if(slide==null && getLastSlide()!=null){ // just started sliding
-                getLastSlide().incrementScore(velocity, getDirection(), bridge.getRealAccel());
-            }
-            else if(getLastSlide()==null) { // not sliding
-                return;
-            }
-            else if(slide!=null) { // in process of sliding
-                slide.incrementScore(velocity, getDirection(), bridge.getRealAccel());
-            }
-
-            if(lastSlide!=null && getLastSlide().isComplete()){ // just finished
-                SlideHistory.getInstance().add(getLastSlide());
-                lastSlide = null;
-            }
-        }
-        else if(origin instanceof VelocityMeter) {}*/
     }
 }

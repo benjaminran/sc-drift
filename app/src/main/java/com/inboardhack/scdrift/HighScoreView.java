@@ -1,6 +1,7 @@
 package com.inboardhack.scdrift;
 
 import android.content.Context;
+import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.ViewGroup;
@@ -35,13 +36,15 @@ public class HighScoreView extends RelativeLayout {
         setGravity(CENTER_IN_PARENT);
         scoreView = new TextView(context);
         LayoutParams params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
         scoreView.setLayoutParams(params);
-        scoreView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 32);
+        scoreView.setTypeface(null, Typeface.BOLD_ITALIC);
+        scoreView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 128);
         scoreLabel = new TextView(context);
         scoreLabel.setText("High Score:");
         update();
         addView(scoreView);
-        addView(scoreLabel);
+//        addView(scoreLabel);
     }
 
     public void update() {

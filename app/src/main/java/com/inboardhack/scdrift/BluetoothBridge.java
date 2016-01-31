@@ -21,147 +21,40 @@ import java.util.ArrayList;
 import java.util.Set;
 import java.util.UUID;
 
-import co.lujun.lmbluetoothsdk.BluetoothController;
-import co.lujun.lmbluetoothsdk.base.BluetoothListener;
-import co.lujun.lmbluetoothsdk.base.State;
-
 /**
  * Created by benjaminran on 1/30/16.
  */
-public class BluetoothBridge implements SensorEventListener, Runnable {
+public class BluetoothBridge implements Runnable {
 
     static final int UPDATE_PERIOD_MS = 10;
     BluetoothAdapter mBluetoothAdapter;
     BluetoothDevice mmDevice;
     UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
+    boolean connected = false;
     OutputStream mmOutputStream;
     InputStream mmInputStream;
 
     private ArrayList<byte[]> data;
-    BluetoothController mBTController;
     private static final String BT_MAC_ADDRESS = "98:D3:31:FB:20:2B";
-    private ArrayList<Observer> observers;
     private static BluetoothBridge instance = null;
     private Handler mHandler;
-    private SensorManager mSensorManager;
-    private Sensor accelerometer, gyroscope, gravity, orientation, linearAccelerometer;
-    private double[] accelerometerData, rotationData, gravityData;
+    private double[] realAccel, worldAccel, rotation, gravity;
+    private double speed;
 
-    private BluetoothBridge(Context context, Handler mHandler) {
+    private BluetoothBridge(Handler mHandler) {
         this.mHandler = mHandler;
-        mSensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
-        accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        gyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
-        orientation = mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
-        linearAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
-        accelerometerData = new double[3];
-        rotationData = new double[9];
-
-        gravity = mSensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY);
-        gravityData = new double[3];
-
-        data = new ArrayList<>();
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while(true) {
-                    if(data.size()>0) {
-                        byte[] bytes = dequeueData();
-                        if(!Utils.checksum(Utils.convert(bytes)))
-                            continue;
-                        else Log.d("scd", new String(bytes));
-                    }
-                    try {
-                        Thread.sleep(50);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }).start();
-
-        setUpBluetooth();//context);
-
-        onResume();
-    }
-
-    public void enqueueData(byte[] bytes) {
-        data.add(Utils.checksumTransform(bytes));
-    }
-
-    public byte[] dequeueData() {
-        return data.remove(0);
-    }
-
-    private void setUpBluetooth2(final Context context) {
-        mBTController = BluetoothController.getInstance().build(context);
-        mBTController.setAppUuid(UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"));
-        mBTController.setBluetoothListener(new BluetoothListener() {
-
-            @Override
-            public void onActionStateChanged(int preState, int state) {
-                Log.d("scd", "bluetooth service state:" + state);
-                if (state == State.STATE_CONNECTED) {
-                    //Intent intent = new Intent(ClassicBluetoothActivity.this, ChatActivity.class);
-                    //startActivityForResult(intent, 4);
-                }
-            }
-
-            @Override
-            public void onActionDiscoveryStateChanged(String discoveryState) {
-                // Callback when local Bluetooth adapter discovery process state changed.
-                if (discoveryState.equals(BluetoothAdapter.ACTION_DISCOVERY_STARTED)) {
-                    Toast.makeText(context, "scanning!", Toast.LENGTH_SHORT).show();
-                } else if (discoveryState.equals(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)) {
-                    Toast.makeText(context, "scan finished!", Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onActionScanModeChanged(int preScanMode, int scanMode) {
-                // Callback when the current scan mode changed.
-                Log.d("scd", "preScanMode:" + preScanMode + ", scanMode:" + scanMode);
-            }
-
-            @Override
-            public void onBluetoothServiceStateChanged(int state) {
-                // Callback when the connection state changed.
-                Log.d("scd", "bluetooth service state:" + state);
-                if (state == State.STATE_CONNECTED) {
-                    //Intent intent = new Intent(context, ChatActivity.class);
-                    //startActivityForResult(intent, 4);
-                    BluetoothDevice device = mBTController.getConnectedDevice();
-                    Log.i("scd", "Name: " + device.getName());
-                    Log.i("scd", "Address" + device.getAddress());
-                    Log.i("scd", "Contents: " + device.describeContents());
-
-                }
-            }
-
-            @Override
-            public void onActionDeviceFound(BluetoothDevice device) {
-                // Callback when found device.
-
-            }
-
-            @Override
-            public void onReadData(final BluetoothDevice device, final byte[] data) {
-                // Callback when remote device send data to current device.
-                processData(device, data);
-                enqueueData(data);
-            }
-        });
-        //mBTController.startAsServer();
-        mBTController.connect(BT_MAC_ADDRESS);
+        realAccel = new double[3];
+        worldAccel = new double[3];
+        rotation = new double[9];
+        gravity = new double[3];
+        setUpBluetooth();
     }
 
     private void setUpBluetooth(){
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
         if(pairedDevices.size() > 0) {
-            for(BluetoothDevice device : pairedDevices)
-            {
+            for(BluetoothDevice device : pairedDevices) {
                 Log.i("scd", device.toString());
             }
         }
@@ -170,6 +63,7 @@ public class BluetoothBridge implements SensorEventListener, Runnable {
         try {
             mmSocket = mmDevice.createRfcommSocketToServiceRecord(uuid);
             mmSocket.connect();
+            connected = true;
             mmOutputStream = mmSocket.getOutputStream();
             mmInputStream = mmSocket.getInputStream();
         } catch (IOException e) {
@@ -178,7 +72,7 @@ public class BluetoothBridge implements SensorEventListener, Runnable {
     }
 
     public boolean isConnected() {
-        return mBTController.getConnectionState()==State.STATE_CONNECTED;
+        return connected;
     }
 
     private void processData(final BluetoothDevice device, final byte[] bytes) {
@@ -191,15 +85,10 @@ public class BluetoothBridge implements SensorEventListener, Runnable {
         Log.i("scd", "DATA:"+data);
     }
 
-    public void registerObserver(Observer o) {
-        if(observers==null) observers = new ArrayList<>();
-        observers.add(o);
-    }
-
     // must be called first
     public static BluetoothBridge getInstance(StartActivity activity, Handler mHandler) {
         new FindBoard(activity).execute();
-        instance = new BluetoothBridge(activity, mHandler);
+        instance = new BluetoothBridge(mHandler);
         return instance;
     }
 
@@ -207,54 +96,11 @@ public class BluetoothBridge implements SensorEventListener, Runnable {
         return instance;
     }
 
-    @Override
-    public void onSensorChanged(SensorEvent event) {
-        if(event.sensor==accelerometer) {
-            accelerometerData[0] = event.values[0];
-            accelerometerData[1] = event.values[1] * -1;
-            accelerometerData[2] = event.values[2];
-        }
-        else if(event.sensor==gyroscope) {
-            rotationData[3] = event.values[0];
-            rotationData[4] = event.values[1] * -1;
-            rotationData[5] = event.values[2];
-        }
-        else if(event.sensor==gravity) {
-            gravityData[0] = event.values[0];
-            gravityData[1] = event.values[1] * -1;
-            gravityData[2] = event.values[2];
-        }
-        else if(event.sensor==orientation) {
-            rotationData[0] = event.values[0];
-            rotationData[1] = event.values[1]*-1;
-            rotationData[2] = event.values[2];
-        }
-        /*else if(event.sensor==accelerometer) {
-            linearAccelerometerData[0] = event.values[0];
-            linearAccelerometerData[1] = event.values[1] * -1;
-            linearAccelerometerData[2] = event.values[2];
-        }*/
-    }
-
-    public double[] getRealAccel() { return accelerometerData; }
-    public double[] getWorldAccel() { return accelerometerData; }
-    public double[] getGravity() { return gravityData; }
-    public double[] getRotationData() { return rotationData; }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {}
-
-    protected void onResume() {
-        mSensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_GAME);
-        mSensorManager.registerListener(this, gyroscope, SensorManager.SENSOR_DELAY_GAME);
-        mSensorManager.registerListener(this, orientation, SensorManager.SENSOR_DELAY_GAME);
-        mSensorManager.registerListener(this, linearAccelerometer, SensorManager.SENSOR_DELAY_GAME);
-        mSensorManager.registerListener(this, gravity, SensorManager.SENSOR_DELAY_GAME);
-    }
-
-    protected void onPause() {
-        mSensorManager.unregisterListener(this);
-    }
+    public double[] getRealAccel() { return realAccel; }
+    public double[] getWorldAccel() { return worldAccel; }
+    public double[] getGravity() { return gravity; }
+    public double[] getRotationData() { return rotation; }
+    public double[] getDirection() { return new double[]{rotation[0],rotation[1],rotation[2]};}
 
     @Override
     public void run() {
@@ -263,12 +109,67 @@ public class BluetoothBridge implements SensorEventListener, Runnable {
     }
 
     private void update() {
+        // read bluetooth
         String message = null;
-        try {
-            message = Utils.sanitizeInput(mmInputStream);
-        } catch (IOException e) {
-            e.printStackTrace();
+        try { message = Utils.sanitizeInput(mmInputStream);} catch (IOException e) {e.printStackTrace();}
+//        Log.d("scd", "MESSAGE:"+message);
+        // parse message
+        try{parseMessage(message);} catch(NumberFormatException e){e.printStackTrace();}
+        Log.i("scd", "Speed: "+speed);
+        // update position
+        if(Board.getInstance()==null) return;
+        Board.getInstance().updatePosition(worldAccel, realAccel, speed, System.currentTimeMillis());
+        Board.getInstance().setRotation(rotation);
+        Slide slide = Board.getInstance().newSlide(System.currentTimeMillis());
+        if(slide==null && Board.getInstance().getLastSlide()!=null) { // didn't just start sliding
+            Board.getInstance().getLastSlide().incrementScore(Board.getInstance().getVelocity(), getDirection(), realAccel);
         }
-        Log.d("scd", "MESSAGE:"+message);
+        else if(slide!=null) { // just started sliding
+            slide.incrementScore(Board.getInstance().getVelocity(), getDirection(), realAccel);
+        }
+        if(Board.getInstance().getLastSlide()!=null && Board.getInstance().getLastSlide().isComplete()) { // just finished sliding
+            Slide lastSlide = Board.getInstance().getLastSlide();
+            if(!SlideHistory.getInstance().contains(lastSlide)) {
+                lastSlide.setEndTime(System.currentTimeMillis());
+                SlideHistory.getInstance().add(lastSlide);
+
+            }
+        }
+    }
+
+    private void parseMessage(String message) throws NumberFormatException {
+        if(message==null) return;
+        String dataTag = message.substring(0,3);
+        if(dataTag.equals("wac")) { // world-oriented accelerometer data (no gravity)
+            String[] values = message.substring(4).split(",");
+            worldAccel[0] = Double.parseDouble(values[0]);
+            worldAccel[1] = Double.parseDouble(values[1]);
+            worldAccel[2] = Double.parseDouble(values[2]);
+        }
+        else if(dataTag.equals("vel")) { // velocity
+            double tmp = Double.parseDouble(message.substring(4));
+            if(tmp<13.5) speed = tmp;
+            else {
+                Log.d("scd", "Speed spiked at "+tmp+"m/s");
+            }
+        }
+        else if(dataTag.equals("acc")) { // real acceleration (no gravity)
+            String[] values = message.substring(4).split(",");
+            realAccel[0] = Double.parseDouble(values[0]);
+            realAccel[1] = Double.parseDouble(values[1]);
+            realAccel[2] = Double.parseDouble(values[2]);
+        }
+        else if(dataTag.equals("rot")) { // orientation (roll, pitch, yaw)
+            String[] values = message.substring(4).split(",");
+            rotation[0] = Double.parseDouble(values[0]);
+            rotation[1] = Double.parseDouble(values[1]);
+            rotation[2] = Double.parseDouble(values[2]);
+        }
+        else if(dataTag.equals("gyr")) { // angular velocity (roll, pitch, yaw)
+            String[] values = message.substring(4).split(",");
+            rotation[3] = Double.parseDouble(values[0]);
+            rotation[4] = Double.parseDouble(values[1]);
+            rotation[5] = Double.parseDouble(values[2]);
+        }
     }
 }
