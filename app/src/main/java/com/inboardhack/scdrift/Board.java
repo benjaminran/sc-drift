@@ -163,6 +163,7 @@ public class Board {
         if (Math.abs(rotation[5]) > MAX_ANGULAR_ACCELERATION && !isSliding(speed)) {
             mult = speed / Math.sqrt(Math.pow(position[3],2)+Math.pow(position[4],2)+Math.pow(position[5],2));
         } else {
+            return getVelocity();
             mult = speed;
             setVelocity(getDirection());
         }
@@ -278,6 +279,7 @@ public class Board {
         return null;
     }
     public boolean isSliding(double speed) {
+        return (rotation[5] > MAX_ANGULAR_ACCELERATION + MINSLIDESTRENGTH)
       //  double caaccel = speed * rotation[5];
       //  double slideStrength = Math.abs(caaccel) - Math.abs(realAccel[1]);
         double[] velocity = getVelocity();
