@@ -19,6 +19,7 @@ public class Board implements Observer {
 
     /* must be called at a point when gravity vector is available */
     private Board(DataService dataService) {
+        this.dataService = dataService;
         dataService.bridge.registerObserver(this);
         double[] acceleration = dataService.bridge.getGravity(); // initialize with gravity vector
         position[0] = 0;
@@ -286,7 +287,10 @@ public class Board implements Observer {
     @Override
     public void observeUpdate(Object origin) { // update board with new data
         if(origin instanceof BluetoothBridge) {
-            if(dataService==null) return; // TODO
+            if(dataService==null) {
+                Log.d("scd", "dataService was null");
+                return; // TODO
+            }
             Log.d("scd", String.format("%f; %f; %f; %f", dataService.getVelocityMeter().speed, dataService.getVelocityMeter().bearing, dataService.getVelocityMeter().da, dataService.getVelocityMeter().dt));
             logBoard();
             long currentTime = System.currentTimeMillis();
