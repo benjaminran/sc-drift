@@ -82,7 +82,7 @@ public class BluetoothBridge implements Runnable {
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-        Log.i("scd", "DATA:"+data);
+//        Log.i("scd", "DATA:"+data);
     }
 
     // must be called first
@@ -112,13 +112,14 @@ public class BluetoothBridge implements Runnable {
         // read bluetooth
         String message = null;
         try { message = Utils.sanitizeInput(mmInputStream);} catch (IOException e) {e.printStackTrace();}
-//        Log.d("scd", "MESSAGE:"+message);
+        Log.d("scd", "MESSAGE:"+message);
         // parse message
         try{parseMessage(message);} catch(NumberFormatException e){e.printStackTrace();}
 //        Log.i("scd", "Speed: "+speed);
         // update position
         if(Board.getInstance()==null) return;
         Board.getInstance().updatePosition(worldAccel, realAccel, speed, System.currentTimeMillis());
+        Log.d("scd", "Rotation[5]: "+rotation[5]+" IsSliding:" + Board.getInstance().isSliding(speed));
         Board.getInstance().setRotation(rotation);
         Slide slide = Board.getInstance().newSlide(System.currentTimeMillis());
         if(slide==null && Board.getInstance().getLastSlide()!=null) { // didn't just start sliding
@@ -149,7 +150,7 @@ public class BluetoothBridge implements Runnable {
         else if(dataTag.equals("vel")) { // velocity
             double tmp = Double.parseDouble(message.substring(4));
 //            if(tmp<13.5 && tmp>=0.0)
-            speed = tmp;
+            speed = 0;
             /*else {
                 Log.d("scd", "Speed spiked at "+tmp+"m/s");
             }*/

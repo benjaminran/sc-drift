@@ -15,7 +15,7 @@ public class Board {
     private long lastUpdate = 0;
     private Slide lastSlide;
     private float initBearing = 0.0f;
-    public static final double MINSLIDESTRENGTH = 0.0;
+    public static final double MINSLIDESTRENGTH = 0.3;
     public static final double MAX_ANGULAR_ACCELERATION = 0.2;
 
     /* must be called at a point when gravity vector is available */
@@ -164,8 +164,8 @@ public class Board {
             mult = speed / Math.sqrt(Math.pow(position[3],2)+Math.pow(position[4],2)+Math.pow(position[5],2));
         } else {
             return getVelocity();
-            mult = speed;
-            setVelocity(getDirection());
+//            mult = speed;
+//            setVelocity(getDirection());
         }
         position[3] *= mult;
         position[4] *= mult;
@@ -279,13 +279,13 @@ public class Board {
         return null;
     }
     public boolean isSliding(double speed) {
-        return (rotation[5] > MAX_ANGULAR_ACCELERATION + MINSLIDESTRENGTH)
+        return (rotation[5] > MAX_ANGULAR_ACCELERATION + MINSLIDESTRENGTH);
       //  double caaccel = speed * rotation[5];
       //  double slideStrength = Math.abs(caaccel) - Math.abs(realAccel[1]);
-        double[] velocity = getVelocity();
+        /*double[] velocity = getVelocity();
         double[] direction = getDirection();
         double slideStrength = (Math.sqrt(Math.pow(velocity[1]*direction[2] - velocity[2]*direction[1], 2) + Math.pow(velocity[2]*direction[0] - velocity[0]*direction[2], 2) + Math.pow(velocity[0]*direction[1] - velocity[1]*direction[0], 2)));
-        return (slideStrength > MINSLIDESTRENGTH);
+        return (slideStrength > MINSLIDESTRENGTH);*/
     }
     public Slide getLastSlide() {
         return lastSlide;
