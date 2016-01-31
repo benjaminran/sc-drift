@@ -32,6 +32,18 @@ public class MainActivity extends AppCompatActivity implements Observer {
         bindService(intent, serviceConnection, 0);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(dataService!=null) dataService.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if(dataService!=null) dataService.onPause();
+    }
+
     private void initUi() {
         scoreView = (ScoreView) findViewById(R.id.score_view);
     }

@@ -7,6 +7,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Location;
 import android.os.Handler;
+import android.util.Log;
 
 import java.util.ArrayList;
 
@@ -37,6 +38,8 @@ public class BluetoothBridge implements SensorEventListener, Runnable {
 
         gravity = mSensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY);
         gravityData = new double[3];
+
+        onResume();
     }
 
     public void registerObserver(Observer o) {
@@ -77,14 +80,14 @@ public class BluetoothBridge implements SensorEventListener, Runnable {
             rotationData[1] = event.values[1]*-1;
             rotationData[2] = event.values[2];
         }
-        else if(event.sensor==linearAccelerometer) {
+        /*else if(event.sensor==accelerometer) {
             linearAccelerometerData[0] = event.values[0];
             linearAccelerometerData[1] = event.values[1] * -1;
             linearAccelerometerData[2] = event.values[2];
-        }
+        }*/
     }
 
-    public double[] getRealAccel() { return linearAccelerometerData; }
+    public double[] getRealAccel() { return accelerometerData; }
     public double[] getWorldAccel() { return accelerometerData; }
     public double[] getGravity() { return gravityData; }
     public double[] getRotationData() { return rotationData; }

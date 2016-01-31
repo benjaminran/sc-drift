@@ -15,6 +15,7 @@ public class Slide {
         initSpeed = speed;
         startTime = timems;
         complete = false;
+        this.board = board;
     }
     public int getScore() {
         return score;
