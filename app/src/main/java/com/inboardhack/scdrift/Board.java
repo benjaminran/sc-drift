@@ -68,12 +68,6 @@ public class Board {
         if(instance==null) {
             instance = new Board(dataService);
         }
-        for(int i=0; i<6; i++) // dummy slide data; TODO: remove
-            SlideHistory.getInstance().add(new Slide(5, System.currentTimeMillis(), Board.getInstance()));
-        SlideHistory.getInstance().get(1).incrementScore(new double[]{0,-10,0}, new double[]{1,0,0}, new double[]{0,3,0});
-        SlideHistory.getInstance().get(2).incrementScore(new double[]{0,-6.78,0}, new double[]{1,0,0}, new double[]{0,2.3,0});
-        SlideHistory.getInstance().get(3).incrementScore(new double[]{0,-10,0}, new double[]{1,0,0}, new double[]{0,6,0});
-        SlideHistory.getInstance().get(0).incrementScore(new double[]{0,-12,0}, new double[]{1,0,0}, new double[]{0,6,0});
         return instance;
     }
 
@@ -184,14 +178,25 @@ public class Board {
         position[3] += acceleration[0] * (timems - lastUpdate) / 1000.0;
         position[4] += acceleration[1] * (timems - lastUpdate) / 1000.0;
         position[5] += acceleration[2] * (timems - lastUpdate) / 1000.0;
-        Log.d("scd", String.format("a: %f,%f,%f   dt: %f  <-------------------------", acceleration[0], acceleration[1], acceleration[2], ((timems - lastUpdate)/1000.0)));
+//        Log.d("scd", String.format("a: %f,%f,%f   dt: %f  <-------------------------", acceleration[0], acceleration[1], acceleration[2], ((timems - lastUpdate)/1000.0)));
         lastUpdate = timems;
         return getVelocity();
     }
+
+    double r0, r1, r2, w0, w1, w2 = 0;
+    long n = 0;
+
     public double[] updateVelocity(double speed, long timems) {
         incrementVelocity(timems);
-        normalizeVelocity(speed);
+//        normalizeVelocity(speed);
         lastUpdate = timems;
+        r0 += getRealAcceleration()[0];
+        r1 += getRealAcceleration()[1];
+        r2 += getRealAcceleration()[2];
+        w0 += position[6];
+        w1 += position[7];
+        w2 += position[8];
+        Log.d("scd", "Mean: "+Utils.join(",", new double[]{r0/n,r1/n,r2/n,w0/n,w1/n,w2/n++}));
         return getVelocity();
     }
     public double[] updateVelocity(double speed, double[] acceleration, long timems) {

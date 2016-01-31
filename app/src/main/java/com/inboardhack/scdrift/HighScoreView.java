@@ -12,13 +12,16 @@ import android.widget.TextView;
 /**
  * Created by benjaminran on 1/29/16.
  */
-public class HighScoreView extends RelativeLayout {
+public class HighScoreView extends RelativeLayout implements Observer {
 
     private TextView scoreView;
     private TextView scoreLabel;
+    private Context context;
 
     public HighScoreView(Context context) {
         super(context);
+        this.context = context;
+        SlideHistory.getInstance().registerObserver(this);
         init(context);
     }
 
@@ -39,7 +42,7 @@ public class HighScoreView extends RelativeLayout {
         params.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
         scoreView.setLayoutParams(params);
         scoreView.setTypeface(null, Typeface.BOLD_ITALIC);
-        scoreView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 128);
+        scoreView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 82);
         scoreLabel = new TextView(context);
         scoreLabel.setText("High Score:");
         update();
@@ -54,5 +57,15 @@ public class HighScoreView extends RelativeLayout {
             if(s.getScore()>max.getScore()) max = s;
         }
         scoreView.setText(""+max.getScore());
+    }
+
+    @Override
+    public void observeUpdate(Object o) {
+        ((MainActivity) context).runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                update();
+            }
+        });
     }
 }

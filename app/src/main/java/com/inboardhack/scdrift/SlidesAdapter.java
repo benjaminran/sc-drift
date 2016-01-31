@@ -18,7 +18,7 @@ import java.text.SimpleDateFormat;
 public class SlidesAdapter extends BaseAdapter implements Observer {
 
     private Context context;
-    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("MM/dd HH:mm");
 
     public SlidesAdapter(Context context) {
         super();

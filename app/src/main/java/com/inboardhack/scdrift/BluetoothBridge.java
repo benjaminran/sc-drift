@@ -115,7 +115,7 @@ public class BluetoothBridge implements Runnable {
 //        Log.d("scd", "MESSAGE:"+message);
         // parse message
         try{parseMessage(message);} catch(NumberFormatException e){e.printStackTrace();}
-        Log.i("scd", "Speed: "+speed);
+//        Log.i("scd", "Speed: "+speed);
         // update position
         if(Board.getInstance()==null) return;
         Board.getInstance().updatePosition(worldAccel, realAccel, speed, System.currentTimeMillis());
@@ -137,27 +137,28 @@ public class BluetoothBridge implements Runnable {
         }
     }
 
-    private void parseMessage(String message) throws NumberFormatException {
+    public void parseMessage(String message) throws NumberFormatException {
         if(message==null) return;
         String dataTag = message.substring(0,3);
         if(dataTag.equals("wac")) { // world-oriented accelerometer data (no gravity)
             String[] values = message.substring(4).split(",");
-            worldAccel[0] = Double.parseDouble(values[0]);
-            worldAccel[1] = Double.parseDouble(values[1]);
-            worldAccel[2] = Double.parseDouble(values[2]);
+            worldAccel[0] = Double.parseDouble(values[0])/1671.8;
+            worldAccel[1] = Double.parseDouble(values[1])/1671.8;
+            worldAccel[2] = Double.parseDouble(values[2])/1671.8;//
         }
         else if(dataTag.equals("vel")) { // velocity
             double tmp = Double.parseDouble(message.substring(4));
-            if(tmp<13.5) speed = tmp;
-            else {
+//            if(tmp<13.5 && tmp>=0.0)
+            speed = tmp;
+            /*else {
                 Log.d("scd", "Speed spiked at "+tmp+"m/s");
-            }
+            }*/
         }
         else if(dataTag.equals("acc")) { // real acceleration (no gravity)
             String[] values = message.substring(4).split(",");
-            realAccel[0] = Double.parseDouble(values[0]);
-            realAccel[1] = Double.parseDouble(values[1]);
-            realAccel[2] = Double.parseDouble(values[2]);
+            realAccel[0] = Double.parseDouble(values[0])/1671.8;
+            realAccel[1] = Double.parseDouble(values[1])/1671.8;
+            realAccel[2] = Double.parseDouble(values[2])/1671.8;
         }
         else if(dataTag.equals("rot")) { // orientation (roll, pitch, yaw)
             String[] values = message.substring(4).split(",");
