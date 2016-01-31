@@ -99,6 +99,14 @@ public class VelocityMeter implements LocationListener, android.location.Locatio
         throw new NullPointerException("Couldn't connect");
     }
 
+    public boolean locationHasAll() {
+        if(currentLocation==null) {
+            Log.d("scd", "currentLocation is null");
+            return false;
+        }
+        return currentLocation.hasAltitude() && currentLocation.hasSpeed() && currentLocation.hasBearing();
+    }
+
     @Override
     public void onLocationChanged(Location location) {
         previousLocation = currentLocation;

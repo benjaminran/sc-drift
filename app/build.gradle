@@ -19,10 +19,19 @@ android {
     }
 }
 
+repositories {
+    maven {
+        url "http://arissa34.free.fr/maven2/"
+        artifactUrls mavenLocal()
+    }
+    mavenCentral()
+}
+
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.1.1'
     compile 'com.android.support:design:23.1.1'
     compile 'com.google.android.gms:play-services:8.4.0'
+    compile 'com.ramimartin.bluetooth:AndroidBluetoothLibrary:1.0.1-SNAPSHOT'
 }

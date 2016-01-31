@@ -58,7 +58,7 @@ public class Board implements Observer {
 
     private void logBoard() {
         Log.d("scd", "position: " + Utils.join(",", position));
-        Log.d("scd", "rotaion: " + Utils.join(",", rotation));
+        Log.d("scd", "rotation: " + Utils.join(",", rotation));
         Log.d("scd", "oldPosition: " + Utils.join(",", oldPosition));
         Log.d("scd", "lastUpdate: " + lastUpdate);
         Log.d("scd", "initBearing: " + initBearing);
@@ -165,7 +165,7 @@ public class Board implements Observer {
         position[3] += acceleration[0] * (timems - lastUpdate) / 1000.0;
         position[4] += acceleration[1] * (timems - lastUpdate) / 1000.0;
         position[5] += acceleration[2] * (timems - lastUpdate) / 1000.0;
-        Log.d("scd", String.format("a: %f,%f,%f   dt: %f  <-------------------------", acceleration[0], acceleration[1], acceleration[2], ((timems - lastUpdate)/1000.0));
+        Log.d("scd", String.format("a: %f,%f,%f   dt: %f  <-------------------------", acceleration[0], acceleration[1], acceleration[2], ((timems - lastUpdate)/1000.0)));
         lastUpdate = timems;
         return getVelocity();
     }
@@ -261,7 +261,7 @@ public class Board implements Observer {
     }
     public Slide newSlide(long timems) {
         double speed = Math.sqrt(Math.pow(position[3],2)+Math.pow(position[4],2)+Math.pow(position[5],2));
-        if (isSliding(speed) && (lastSlide.isComplete() || lastSlide == null)) {
+        if (isSliding(speed) && (lastSlide == null || lastSlide.isComplete())) {
             lastSlide = new Slide(speed, timems, this);
             return lastSlide;
         }
@@ -291,16 +291,15 @@ public class Board implements Observer {
                 Log.d("scd", "dataService was null");
                 return; // TODO
             }
-            Log.d("scd", String.format("%f; %f; %f; %f", dataService.getVelocityMeter().speed, dataService.getVelocityMeter().bearing, dataService.getVelocityMeter().da, dataService.getVelocityMeter().dt));
-            logBoard();
             long currentTime = System.currentTimeMillis();
             BluetoothBridge bridge = dataService.bridge;
             // check dt
             if(currentTime-lastUpdate==0) return;
-            else lastUpdate = currentTime;
+            Log.d("scd", String.format("%f; %f; %f; %f", dataService.getVelocityMeter().speed, dataService.getVelocityMeter().bearing, dataService.getVelocityMeter().da, dataService.getVelocityMeter().dt));
+            logBoard();
             // update position
             double[] velocity = computeVelocity(dataService.getVelocityMeter().speed, dataService.getVelocityMeter().bearing, dataService.getVelocityMeter().da, dataService.getVelocityMeter().dt);
-            updatePosition(bridge.getWorldAccel(), bridge.getRealAccel(), velocity, new double[]{0, 0, 0}, currentTime);
+            updatePosition(bridge.getWorldAccel(), bridge.getRealAccel(), velocity, new double[]{0, 0, 0}, currentTime, dataService.getVelocityMeter().locationHasAll());
             setRotation(bridge.getRotationData());
             Slide slide = newSlide(currentTime);
             if(slide==null && getLastSlide()!=null){ // just started sliding
