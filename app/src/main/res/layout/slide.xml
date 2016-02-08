@@ -6,8 +6,9 @@
     <TextView android:id="@+id/slide_score"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
         android:textStyle="bold"
-        android:textSize="72dp"
+        android:textSize="36dp"
         android:text="0"/>
 
     <TextView android:id="@+id/slide_score_label"
@@ -16,28 +17,28 @@
         android:layout_weight="1"
         android:text="pts."/>
 
-    <TextView android:id="@+id/slide_length"
+    <TextView android:id="@+id/slide_duration"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
-        android:textSize="36dp"
+        android:textSize="18dp"
         android:text="0"/>
 
-    <TextView android:id="@+id/slide_length_label"
+    <TextView android:id="@+id/slide_duration_label"
         android:layout_height="wrap_content"
         android:layout_width="0dp"
         android:layout_weight="1"
-        android:text="sec."/>
+        android:text=" sec."/>
 
-    <TextView android:id="@+id/slide_distance"
+    <TextView android:id="@+id/slide_datetime"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
-        android:textSize="36dp"
+        android:textSize="18dp"
         android:text="0"/>
 
-    <TextView android:id="@+id/slide_distance_label"
+    <!--<TextView android:id="@+id/slide_datetime_label"
         android:layout_height="wrap_content"
         android:layout_width="0dp"
         android:layout_weight="1"
-        android:text="ft."/>
+        android:text="ft."/>-->
 
 </LinearLayout>

@@ -14,7 +14,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
     private DataService dataService;
 
     private HighScoreView highScoreView;
-    private DataUpdater dataUpdater;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,18 +29,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
         serviceConnection = new DataServiceConnection(new Handler(getMainLooper()));
         serviceConnection.registerObserver(this);
         bindService(intent, serviceConnection, 0);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if(dataService!=null) dataService.onResume();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if(dataService!=null) dataService.onPause();
     }
 
     private void initUi() {
@@ -68,6 +55,5 @@ public class MainActivity extends AppCompatActivity implements Observer {
     @Override
     public void observeUpdate(Object origin) {
         dataService = serviceConnection.dataService;
-        dataService.getVelocityMeter().registerForLocationIfNeeded(this);
     }
 }

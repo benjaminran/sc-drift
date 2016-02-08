@@ -1,9 +1,9 @@
 package com.inboardhack.scdrift;
 
-import android.text.TextUtils;
 import android.util.Log;
 
-public class Board implements Observer {
+/* TODO: Constants: MINSLIDESTRENGTH, MAXANGULARACCELERATION */
+public class Board {
 
     public static Board instance = null;
     private DataService dataService;
@@ -15,14 +15,13 @@ public class Board implements Observer {
     private long lastUpdate = 0;
     private Slide lastSlide;
     private float initBearing = 0.0f;
-    public static final double MINSLIDESTRENGTH = 0.0;
+    public static final double MINSLIDESTRENGTH = 0.3;
     public static final double MAX_ANGULAR_ACCELERATION = 0.2;
 
     /* must be called at a point when gravity vector is available */
     private Board(DataService dataService) {
         this.dataService = dataService;
-        dataService.bridge.registerObserver(this);
-        double[] acceleration = dataService.bridge.getGravity(); // initialize with gravity vector
+        double[] acceleration = BluetoothBridge.getInstance().getGravity(); // initialize with gravity vector
         position[0] = 0;
         position[1] = 0;
         position[2] = 0;
@@ -69,12 +68,6 @@ public class Board implements Observer {
         if(instance==null) {
             instance = new Board(dataService);
         }
-        for(int i=0; i<6; i++) // dummy slide data; TODO: remove
-            SlideHistory.getInstance().add(new Slide(5, System.currentTimeMillis(), Board.getInstance()));
-        SlideHistory.getInstance().get(1).incrementScore(new double[]{0,-10,0}, new double[]{1,0,0}, new double[]{0,3,0});
-        SlideHistory.getInstance().get(2).incrementScore(new double[]{0,-6.78,0}, new double[]{1,0,0}, new double[]{0,2.3,0});
-        SlideHistory.getInstance().get(3).incrementScore(new double[]{0,-10,0}, new double[]{1,0,0}, new double[]{0,6,0});
-        SlideHistory.getInstance().get(0).incrementScore(new double[]{0,-12,0}, new double[]{1,0,0}, new double[]{0,6,0});
         return instance;
     }
 
@@ -171,8 +164,8 @@ public class Board implements Observer {
             mult = speed / Math.sqrt(Math.pow(position[3],2)+Math.pow(position[4],2)+Math.pow(position[5],2));
         } else {
             return getVelocity();
-            mult = speed;
-            setVelocity(getDirection());
+//            mult = speed;
+//            setVelocity(getDirection());
         }
         position[3] *= mult;
         position[4] *= mult;
@@ -186,14 +179,25 @@ public class Board implements Observer {
         position[3] += acceleration[0] * (timems - lastUpdate) / 1000.0;
         position[4] += acceleration[1] * (timems - lastUpdate) / 1000.0;
         position[5] += acceleration[2] * (timems - lastUpdate) / 1000.0;
-        Log.d("scd", String.format("a: %f,%f,%f   dt: %f  <-------------------------", acceleration[0], acceleration[1], acceleration[2], ((timems - lastUpdate)/1000.0)));
+//        Log.d("scd", String.format("a: %f,%f,%f   dt: %f  <-------------------------", acceleration[0], acceleration[1], acceleration[2], ((timems - lastUpdate)/1000.0)));
         lastUpdate = timems;
         return getVelocity();
     }
+
+    double r0, r1, r2, w0, w1, w2 = 0;
+    long n = 0;
+
     public double[] updateVelocity(double speed, long timems) {
         incrementVelocity(timems);
-        normalizeVelocity(speed);
+//        normalizeVelocity(speed);
         lastUpdate = timems;
+        r0 += getRealAcceleration()[0];
+        r1 += getRealAcceleration()[1];
+        r2 += getRealAcceleration()[2];
+        w0 += position[6];
+        w1 += position[7];
+        w2 += position[8];
+        Log.d("scd", "Mean: "+Utils.join(",", new double[]{r0/n,r1/n,r2/n,w0/n,w1/n,w2/n++}));
         return getVelocity();
     }
     public double[] updateVelocity(double speed, double[] acceleration, long timems) {
@@ -275,13 +279,13 @@ public class Board implements Observer {
         return null;
     }
     public boolean isSliding(double speed) {
-        return (rotation[5] > MAX_ANGULAR_ACCELERATION + MINSLIDESTRENGTH)
+        return (rotation[5] > MAX_ANGULAR_ACCELERATION + MINSLIDESTRENGTH);
       //  double caaccel = speed * rotation[5];
       //  double slideStrength = Math.abs(caaccel) - Math.abs(realAccel[1]);
-        double[] velocity = getVelocity();
+        /*double[] velocity = getVelocity();
         double[] direction = getDirection();
         double slideStrength = (Math.sqrt(Math.pow(velocity[1]*direction[2] - velocity[2]*direction[1], 2) + Math.pow(velocity[2]*direction[0] - velocity[0]*direction[2], 2) + Math.pow(velocity[0]*direction[1] - velocity[1]*direction[0], 2)));
-        return (slideStrength > MINSLIDESTRENGTH);
+        return (slideStrength > MINSLIDESTRENGTH);*/
     }
     public Slide getLastSlide() {
         return lastSlide;
@@ -293,41 +297,5 @@ public class Board implements Observer {
         ret[1] = speed * Math.sin(dir);
         ret[2] = da / dt;
         return ret;
-    }
-
-    @Override
-    public void observeUpdate(Object origin) { // update board with new data
-        /*if(origin instanceof BluetoothBridge) {
-            if(dataService==null) {
-                Log.d("scd", "dataService was null");
-                return;
-            }
-            long currentTime = System.currentTimeMillis();
-            BluetoothBridge bridge = dataService.bridge;
-            // check dt
-            if(currentTime-lastUpdate==0) return;
-            // update position
-            Log.d("scd", "position: "+Utils.join(",", position));
-            Log.d("scd", "realAccel: "+Utils.join(",", realAccel));
-            double[] velocity = computeVelocity(dataService.getVelocityMeter().speed, dataService.getVelocityMeter().bearing, dataService.getVelocityMeter().da, dataService.getVelocityMeter().dt);
-            updatePosition(new double[]{0,0,0}, bridge.getRealAccel(), velocity, new double[]{0, 0, 0}, currentTime, dataService.getVelocityMeter().locationHasAll());//bridge.getWorldAccel()
-            setRotation(bridge.getRotationData());
-            Slide slide = newSlide(currentTime);
-            if(slide==null && getLastSlide()!=null){ // just started sliding
-                getLastSlide().incrementScore(velocity, getDirection(), bridge.getRealAccel());
-            }
-            else if(getLastSlide()==null) { // not sliding
-                return;
-            }
-            else if(slide!=null) { // in process of sliding
-                slide.incrementScore(velocity, getDirection(), bridge.getRealAccel());
-            }
-
-            if(lastSlide!=null && getLastSlide().isComplete()){ // just finished
-                SlideHistory.getInstance().add(getLastSlide());
-                lastSlide = null;
-            }
-        }
-        else if(origin instanceof VelocityMeter) {}*/
     }
 }

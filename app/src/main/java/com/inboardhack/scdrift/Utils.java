@@ -49,6 +49,7 @@ public class Utils {
     }
 
     public static String sanitizeInput(InputStream is) throws IOException {
+        if(is==null) return null;
         int read = is.read();
         if (read == 123)
 

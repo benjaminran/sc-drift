@@ -13,7 +13,8 @@
         android:id="@+id/score_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"/>
+        android:layout_alignParentTop="true"
+        android:gravity="center"/>
 
     <LinearLayout
         android:id="@+id/slides_header"
@@ -26,22 +27,23 @@
             android:layout_height="wrap_content"
             android:layout_width="0dp"
             android:layout_weight="1"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
             android:textStyle="bold"
             android:text="Score"/>
 
-        <TextView android:id="@+id/slide_length_header"
+        <TextView android:id="@+id/slide_duration_header"
             android:layout_height="wrap_content"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:textStyle="bold"
-            android:text="Time"/>
+            android:text="Duration"/>
 
         <TextView android:id="@+id/slide_distance_header"
             android:layout_height="wrap_content"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:textStyle="bold"
-            android:text="Distance"/>
+            android:text="When"/>
     </LinearLayout>
 
     <com.inboardhack.scdrift.SlidesView
